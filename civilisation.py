@@ -1,4 +1,4 @@
-from genetique import Genetique
+from genetique import Genetique #test
 from colonie import Colonie
 
 class Edge:
