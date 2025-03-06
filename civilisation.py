@@ -2,7 +2,7 @@ from genetique import Genetique #test
 from colonie import Colonie
 
 class Edge:
-    def __init__(self, L, start, end):
+    def __init__(self, L, start, end): 
         self.__pheromone = 0
         self.__distance = L 
         self.__start = start
