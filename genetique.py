@@ -11,4 +11,6 @@ class Genetique:
         pass
 
     def reproduction(self):
-        pass
+        pass 
+
+#test criture
