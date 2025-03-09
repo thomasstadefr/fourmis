@@ -70,6 +70,6 @@ class Genetique:
         for i in range(N_same + N_cross, N_same + N_cross + N_repr):
             pop[i] = self.reproduction(pop[i])
         for i in range(N_cross, N_same + N_cross + N_repr, N_cross, N_same + N_cross + N_repr + N_mut):
-            pop[i] = self.mutation(pop[i])
+            pop[i] = self.mutation(pop[i]) 
 
         
