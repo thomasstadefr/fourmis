@@ -33,13 +33,13 @@ def merge_sort_ants(pop):
     aux(0, len(pop))
 
 class Genetic:
-    def __init__(self, N_pop, mut_rate, cross_rate, repr_rate, metric):
+    def __init__(self, city_graph, N_pop, mut_rate, cross_rate, repr_rate, metric):
         self.__mut_rate = mut_rate
         self.__cross_rate = cross_rate
         self.__repr_rate = repr_rate
         self.__metric = metric
         self.__N_pop = N_pop
-        self.__population = [Fourmi(0, metric) for _ in range(N_pop)] # todo
+        self.__population = [Ant(city_graph, 0, metric) for _ in range(N_pop)] # todo
         self.rank_pop()
 
     def mutation(self, ant): 
