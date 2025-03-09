@@ -1,4 +1,4 @@
-from fourmi import Fourmi
+from ant import Ant
 import random
 
 def uniform(a, b):
@@ -32,7 +32,7 @@ def merge_sort_ants(pop):
 
     aux(0, len(pop))
 
-class Genetique:
+class Genetic:
     def __init__(self, N_pop, mut_rate, cross_rate, repr_rate, metric):
         self.__mut_rate = mut_rate
         self.__cross_rate = cross_rate

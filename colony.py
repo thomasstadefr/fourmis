@@ -1,9 +1,7 @@
 from fourmi import Fourmi
 
-print("hello test")
-
-class Colonie:
-    def __init__(self):
+class Colony:
+    def __init__(self, N_pop, evaporation_rate, metric):
         pass
 
     def evaporation(self):

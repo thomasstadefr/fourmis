@@ -1,6 +1,3 @@
-from genetique import Genetique #test
-from colonie import Colonie
-
 class Edge:
     def __init__(self, L, start, end): 
         self.__pheromone = 0
@@ -16,11 +13,3 @@ class Edge:
     
     def set_pheromone(self, phermone):
         self.__pheromone = phermone
-
-class Simulation(Genetique, Colonie):
-    def __init__(self):
-        super.__init__(Genetique, self)
-        super.__init__(Colonie, self)
-
-    def step(self):
-        pass
