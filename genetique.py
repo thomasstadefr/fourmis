@@ -4,6 +4,34 @@ import random
 def uniform(a, b):
     return a + (b-a)*random.random()
 
+def exchange_ants(pop, i, j):
+    tmp = pop[i]
+    pop[i] = pop[j]
+    pop[j] = tmp
+
+def merge_sort_ants(pop):
+    def merge(i, m, j):
+        t = i
+        r = m
+        s = i
+        while t<m and r<j:
+            if pop[t].get_score() < pop[r].get_score():
+                exchange_ants(pop, t, s)
+                t += 1
+            else:
+                exchange_ants(pop, r, s)
+                r += 1
+            s += 1
+        
+    def aux(i, j):
+        if j-i > 1:
+            m = int((j-i)/2)
+            aux(i, m)
+            aux(m, j)
+            merge(i, m, j)
+
+    aux(0, len(pop))
+
 class Genetique:
     def __init__(self, N_pop, mut_rate, cross_rate, repr_rate, metric):
         self.__mut_rate = mut_rate
@@ -27,9 +55,7 @@ class Genetique:
         pass 
 
     def rank_pop(self):
-        n = self.__N_pop
-        pop = self.__population
-        # todo
+        merge_sort_ants(self.__population)
         
     def step(self):
         pop = self.__population
@@ -49,5 +75,4 @@ class Genetique:
         for i in range(N_cross, N_same + N_cross + N_repr, N_cross, N_same + N_cross + N_repr + N_mut):
             pop[i] = self.mutation(pop[i])
 
-
-#test criture
+        
