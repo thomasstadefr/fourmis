@@ -59,9 +59,6 @@ class Genetique:
         
     def step(self):
         pop = self.__population
-
-        for ant in pop:
-            ant.step()
         self.rank_pop()
 
         N_mut = int(self.__mut_rate * self.__N_pop)
