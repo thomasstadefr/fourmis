@@ -26,7 +26,7 @@ def merge_sort_ants(pop):
         
     def aux(i, j):
         if j-i > 1:
-            m = int((j-i)/2)
+            m = i+int((j-i)/2)
             aux(i, m)
             aux(m, j)
             merge(i, m, j)

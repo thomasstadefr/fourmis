@@ -5,8 +5,8 @@ from city_graph import Edge, City_graph
 
 class Simulation(Genetic, Colony):
     def __init__(self, city_graph:City_graph, N_pop, metric, genetic_args, colony_args):
-        Genetic.__init__(self, N_pop, genetic_args["mut_rate"], genetic_args["cross_rate"], genetic_args["repr_rate"], metric)
-        Colony.__init__(self, city_graph, N_pop, colony_args["evap_rate"], colony_args["Q"])
+        Genetic.__init__(self, city_graph, N_pop, genetic_args["mut_rate"], genetic_args["cross_rate"], genetic_args["repr_rate"], metric)
+        Colony.__init__(self, city_graph, N_pop, colony_args["evap_rate"], colony_args["Q"], metric)
         self.__steps = 0
 
     def get_steps(self):
@@ -44,5 +44,9 @@ edges = [
 
 city_graph = City_graph(4, edges) 
 
-#todo def metric(ant:Ant):
-    
+#todo 
+def metric(ant : Ant):
+    return ant.get_L_path()
+
+s = Simulation(city_graph, 10, metric, genetic_args, colony_args)
+
