@@ -1,5 +1,5 @@
 class Edge:
-    def __init__(self, L, start, end): 
+    def __init__(self, start, end, L): 
         self.__pheromone = 0
         self.__distance = L 
         self.__start = start
@@ -24,9 +24,9 @@ class Edge:
         return self.__start == e.get_start() and self.__end == e.get_end()
         
 class City_graph:
-    def __init__(self, N_v, N_e, edges):
+    def __init__(self, N_v, edges):
         self.__N_v = N_v
-        self.__N_e = N_e
+        self.__N_e = len(edges)
         self.__edges = edges
         
     def get_N_v(self):
@@ -35,17 +35,19 @@ class City_graph:
     def get_edges(self):
         return self.__edges
         
-    def find_edge(self, start, end):
+    def find_edge(self, start, end) -> Edge:
         for e in self.__edges:
             if e.get_start() == start and e.get_end() == end:
                 return e
         
     def add_edge(self, L, start, end):
         self.__edges.append(Edge(L, start, end))
+        self.__N_e += 1
         
     def remove_edge(self, start, end):
         e = self.find_edge(start, end)
         self.__edges.remove(e)
         del(e)
+        self.__N_e -= 1
         
     

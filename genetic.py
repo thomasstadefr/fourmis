@@ -1,4 +1,5 @@
 from ant import Ant
+from city_graph import City_graph
 import random
 
 def uniform(a, b):
@@ -14,8 +15,8 @@ def merge_sort_ants(pop):
         t = i
         r = m
         s = i
-        while t<m and r<j:
-            if pop[t].get_score() < pop[r].get_score():
+        while s<j:
+            if r==j or (t<m and pop[t].get_score()<pop[r].get_score()):
                 exchange_ants(pop, t, s)
                 t += 1
             else:
@@ -33,7 +34,7 @@ def merge_sort_ants(pop):
     aux(0, len(pop))
 
 class Genetic:
-    def __init__(self, city_graph, N_pop, mut_rate, cross_rate, repr_rate, metric):
+    def __init__(self, city_graph : City_graph, N_pop, mut_rate, cross_rate, repr_rate, metric):
         self.__mut_rate = mut_rate
         self.__cross_rate = cross_rate
         self.__repr_rate = repr_rate
