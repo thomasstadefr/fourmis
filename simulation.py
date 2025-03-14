@@ -24,31 +24,118 @@ class Visualisation:
         self.__city_graph = city_graph
         self.__begin = False
         
-        self.__settings_frame = tk.Frame(self.__root, bg="brown")
-        self.__settings_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        self.__bottom_frame = tk.Frame(self.__root, bg="pink")
+        self.__bottom_frame.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        self.__settings_frame = tk.Frame(self.__bottom_frame, bg="brown")
+        self.__settings_frame.pack(side=tk.LEFT, fill=tk.X)
         
         self.__begin_button = tk.Button(self.__settings_frame, text = 'Begin', command = self.begin)
         self.__begin_button.pack()
         
         self.__create_mode_button = tk.Button(self.__settings_frame, text = 'Create mode', command = self.set_mode_create, bg="green")
         self.__create_mode_button.pack()
-        
         self.__delete_edge_mode_button = tk.Button(self.__settings_frame, text = 'Delete edge mode', command = self.set_mode_delete_edge, bg="grey")
         self.__delete_edge_mode_button.pack()
-        
         self.__delete_node_mode_button = tk.Button(self.__settings_frame, text = 'Delete node mode', command = self.set_mode_delete_node, bg="grey")
         self.__delete_node_mode_button.pack()
         
         self.__step_label = tk.Label(self.__settings_frame, text=f"Etape : -")
         self.__step_label.pack()
         
+        self.__genetic_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
+        self.__genetic_params_frame.pack(side=tk.RIGHT, fill=tk.X)
+        
+        self.__genetic_params = {"mut_rate" : 0, "cross_rate" : 0, "repr_rate" : 0}
+        
+        self.__mut_rate_label = tk.Label(self.__genetic_params_frame, text=f"Mutation rate :")
+        self.__mut_rate_label.pack()
+        self.__mut_rate_entry = tk.Entry(self.__genetic_params_frame)
+        self.__mut_rate_entry.pack()
+        self.__mut_rate_entry.insert(0, 0)
+        
+        self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text=f"Crossover rate :")
+        self.__cross_rate_label.pack()
+        self.__cross_rate_entry = tk.Entry(self.__genetic_params_frame)
+        self.__cross_rate_entry.pack()
+        self.__cross_rate_entry.insert(0, 0)
+        
+        self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text=f"Reproduction rate :")
+        self.__repr_rate_label.pack()
+        self.__repr_rate_entry = tk.Entry(self.__genetic_params_frame)
+        self.__repr_rate_entry.pack()
+        self.__repr_rate_entry.insert(0, 0)
+        
+        self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
+        self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
+        
+        self.__colony_params = {"Q" : 0, "evap_rate" : 0}
+        
+        self.__Q_label = tk.Label(self.__colony_params_frame, text=f"Q :")
+        self.__Q_label.pack()
+        self.__Q_entry = tk.Entry(self.__colony_params_frame)
+        self.__Q_entry.pack()
+        self.__Q_entry.insert(0, 0)
+        
+        self.__evap_rate_label = tk.Label(self.__colony_params_frame, text=f"Evaporation rate :")
+        self.__evap_rate_label.pack()
+        self.__evap_rate_entry = tk.Entry(self.__colony_params_frame)
+        self.__evap_rate_entry.pack()
+        self.__evap_rate_entry.insert(0, 0)
+        
+        self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
+        self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
+        
+        self.__general_params = {"N_pop" : 0, "num_steps" : 0}
+        
+        self.__N_pop_label = tk.Label(self.__general_params_frame, text=f"Population size :")
+        self.__N_pop_label.pack()
+        self.__N_pop_entry = tk.Entry(self.__general_params_frame)
+        self.__N_pop_entry.pack()
+        self.__N_pop_entry.insert(0, 0)
+        
+        self.__num_steps_label = tk.Label(self.__general_params_frame, text=f"Number of steps :")
+        self.__num_steps_label.pack()
+        self.__num_steps_entry = tk.Entry(self.__general_params_frame)
+        self.__num_steps_entry.pack()
+        self.__num_steps_entry.insert(0, 0)
+        
         self.__root.mainloop()
         
     def begin(self):
         self.__begin = True
         
+        genetic_params = self.__genetic_params
+        genetic_params["mut_rate"] = float(self.__mut_rate_entry.get())
+        self.__mut_rate_entry.config(state="readonly")
+        genetic_params["cross_rate"] = float(self.__cross_rate_entry.get())
+        self.__cross_rate_entry.config(state="readonly")
+        genetic_params["repr_rate"] = float(self.__repr_rate_entry.get())
+        self.__repr_rate_entry.config(state="readonly")
+        
+        colony_params = self.__colony_params
+        colony_params["Q"] = float(self.__Q_entry.get())
+        self.__Q_entry.config(state="readonly")
+        colony_params["evap_rate"] = float(self.__evap_rate_entry.get())
+        self.__evap_rate_entry.config(state="readonly")
+        
+        general_params = self.__general_params
+        general_params["N_pop"] = int(self.__N_pop_entry.get())
+        self.__N_pop_entry.config(state="readonly")
+        general_params["num_steps"] = int(self.__num_steps_entry.get())
+        self.__num_steps_entry.config(state="readonly")
+        
     def get_begin(self):
         return self.__begin
+    
+    def get_genetic_params(self):
+        return self.__genetic_params
+    
+    def get_colony_params(self):
+        return self.__colony_params
+    
+    def get_general_params(self):
+        return self.__general_params
     
     def update_step(self, i):
         self.__step_label.config(text=f"Etape : {i}")
@@ -186,16 +273,24 @@ class Visualisation:
         return None 
 
 class Simulation(Genetic, Colony, Visualisation):
-    def __init__(self, city_graph : City_graph, num_steps, N_pop, metric, genetic_args, colony_args):
-        Genetic.__init__(self, city_graph, N_pop, genetic_args["mut_rate"], genetic_args["cross_rate"], genetic_args["repr_rate"], metric)
-        Colony.__init__(self, city_graph, N_pop, colony_args["evap_rate"], colony_args["Q"], metric)
-        Visualisation.__init__(self, city_graph)
+    def __init__(self, metric):
+        self.__city_graph = City_graph()
+        Visualisation.__init__(self, self.__city_graph)
         
         self.__steps = 0
-        while not(self.get_begin()):
-            pass
-        self.launch(num_steps)
-        print("nb sommets :", city_graph.get_N_v(), "\n nb aretes :", city_graph.get_N_e())
+        while True:
+            if self.get_begin():
+                break
+            
+        self.__genetic_params = self.get_genetic_params()
+        self.__colony_params = self.get_colony_params()
+        self.__general_params = self.get_general_params()
+            
+        Genetic.__init__(self, self.__city_graph, self.__general_params["N_pop"], self.__genetic_params["mut_rate"], self.__genetic_params["cross_rate"], self.__genetic_params["repr_rate"], metric)
+        Colony.__init__(self, self.__city_graph, self.__general_params["N_pop"], self.__colony_params["evap_rate"], self.__colony_params["Q"], metric)
+            
+        print("nb sommets :", self.__city_graph.get_N_v(), "\n nb aretes :", self.__city_graph.get_N_e(), "\n general params :", self.__general_params, "\n genetic params :", self.__genetic_params, "\n colony params :", self.__colony_params)
+        self.launch(self.__general_params["num_steps"])
 
     def get_steps(self):
         return self.__steps
@@ -210,22 +305,8 @@ class Simulation(Genetic, Colony, Visualisation):
             self.step()
 
 
-
-genetic_args = {
-    "mut_rate" : 0.1,
-    "cross_rate" : 0.1,
-    "repr_rate" : 0.1
-}
-
-colony_args = {
-    "evap_rate" : 0.1,
-    "Q" : 5
-}
-
-city_graph = City_graph() 
-
 #todo 
 def metric(ant : Ant):
     return ant.get_L_path()
 
-s = Simulation(city_graph, 5, 10, metric, genetic_args, colony_args)
+s = Simulation(metric)
