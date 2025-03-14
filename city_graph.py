@@ -18,6 +18,8 @@ class Node:
     def __eq__(self, n):
         return self.__id == n.get_id()
 
+
+
 class Edge:
     def __init__(self, start : Node, end : Node): 
         self.__pheromone = 0
@@ -42,6 +44,8 @@ class Edge:
         
     def __eq__(self, e):
         return self.__start == e.get_start() and self.__end == e.get_end()
+    
+    
         
 class City_graph:
     def __init__(self):
@@ -65,6 +69,17 @@ class City_graph:
     def add_node(self, n : Node):
         self.__nodes.append(n)
         self.__N_v += 1
+        
+    def remove_node(self, n : Node):
+        self.__nodes.remove(n)
+        edges_from_n = self.find_edges_from_node(n)
+        edges_to_n = self.find_edges_to_node(n)
+        for e in edges_from_n:
+            self.remove_edge(e)
+        for e in edges_to_n:
+            self.remove_edge(e)
+        del(n)
+        self.__N_v -= 1
     
     def find_edge(self, start : Node, end : Node) -> Edge:
         for e in self.__edges:
@@ -72,13 +87,27 @@ class City_graph:
                 return e
         return None
         
+    def find_edges_from_node(self, start : Node):
+        L = []
+        edges = self.__edges
+        for e in edges:
+            if e.get_start() == start:
+                L.append(e)
+        return L
+    
+    def find_edges_to_node(self, end : Node):
+        L = []
+        edges = self.__edges
+        for e in edges:
+            if e.get_end() == end:
+                L.append(e)
+        return L
+    
     def add_edge(self, start : Node, end : Node):
-        if not(self.find_edge(start, end)):
-            self.__edges.append(Edge(start, end))
-            self.__N_e += 1
+        self.__edges.append(Edge(start, end))
+        self.__N_e += 1
         
-    def remove_edge(self, start, end):
-        e = self.find_edge(start, end)
+    def remove_edge(self, e : Edge):
         self.__edges.remove(e)
         del(e)
         self.__N_e -= 1
