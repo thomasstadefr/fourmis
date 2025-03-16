@@ -1,5 +1,5 @@
 from ant import Ant
-from city_graph import Edge, City_graph
+from city_graph import City_graph
 
 class Colony:
     def __init__(self, city_graph : City_graph, N_pop, evap_rate, Q, metric):

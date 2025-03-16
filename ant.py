@@ -1,7 +1,7 @@
-from city_graph import City_graph, Edge
+from city_graph import City_graph
 
 class Ant:
-    def __init__(self, city_graph, pos_init, metric):
+    def __init__(self, city_graph : City_graph, pos_init, metric):
         self.__city_graph = city_graph
         self.__pos = pos_init
         self.__path = [pos_init]
@@ -38,6 +38,7 @@ class Ant:
         self.update_score()
         
     def trip(self):
+        # Autant de pas à faire que nombre de villes : une étape corrspond à un trajet complet 
         N_steps = self.__city_graph.get_N_v()
         for _ in range(N_steps):
             self.moove()

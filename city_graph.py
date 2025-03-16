@@ -17,6 +17,9 @@ class Node:
     
     def __eq__(self, n):
         return self.__id == n.get_id()
+    
+    def __str__(self):
+        return f"id : {self.__id}, coords = ({self.__x}, {self.__y})"
 
 
 
@@ -44,6 +47,9 @@ class Edge:
         
     def __eq__(self, e):
         return self.__start == e.get_start() and self.__end == e.get_end()
+    
+    def __str__(self):
+        return f"({self.get_start().get_id()}, {self.get_end().get_id()})"
     
     
         
@@ -111,5 +117,16 @@ class City_graph:
         self.__edges.remove(e)
         del(e)
         self.__N_e -= 1
+        
+    def __str__(self):
+        txt_nodes = "Nodes : "
+        for n in self.__nodes:
+            txt_nodes += str(n) 
+            txt_nodes += " | "
+        txt_edges = "Edges : "
+        for e in self.__edges:
+            txt_edges += str(e)
+            txt_edges += " | "
+        return "\n" + txt_nodes + "\n" + txt_edges + "\n"
         
     
