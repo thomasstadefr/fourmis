@@ -1,12 +1,12 @@
 from genetic import Genetic
 from colony import Colony
 from ant import Ant
-from city_graph import City_graph, Node
+from city_graph import CityGraph, Node
 import tkinter as tk
 from tkinter import font
 
 class Visualisation:
-    def __init__(self, city_graph : City_graph):
+    def __init__(self, city_graph: CityGraph):
         self.__root = tk.Tk()
         self.__root.geometry("500x500")
         self.__root.title("TSP simulation by ant colony and genetic algorithm")
@@ -16,15 +16,24 @@ class Visualisation:
         self.__canvas = tk.Canvas(self.__canvas_frame, width=500, height=300)
         self.__canvas.pack(fill=tk.BOTH, expand=True)
         
-        self.__drawn_nodes = {}
-        self.__drawn_edges = {}
-        self.__written_ids = {}
+        self.__drawn_nodes: dict[
+            tuple[int, int],
+            int
+        ] = {}
+        self.__drawn_edges: dict[
+            tuple[int, int, int, int],
+            int
+        ] = {}
+        self.__written_ids: dict[
+            tuple[int, int],
+            any
+        ] = {}
         self.__mode = "create"
         self.__canvas.bind("<Button-1>", self.select_node)
         self.__node_curently_selected = None
         
-        self.__city_graph = city_graph
-        self.__begin = False
+        self.__city_graph: CityGraph = city_graph
+        self.__begin: bool = False
         
         self.__bottom_frame = tk.Frame(self.__root, bg="pink")
         self.__bottom_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -42,27 +51,27 @@ class Visualisation:
         self.__delete_node_mode_button = tk.Button(self.__settings_frame, text = 'Delete node mode', command = self.set_mode_delete_node, bg="grey")
         self.__delete_node_mode_button.pack()
         
-        self.__step_label = tk.Label(self.__settings_frame, text=f"Etape : -")
+        self.__step_label = tk.Label(self.__settings_frame, text="Etape : -")
         self.__step_label.pack()
         
         self.__genetic_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__genetic_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__genetic_params = {"mut_rate" : 0, "cross_rate" : 0, "repr_rate" : 0}
+        self.__genetic_params: dict[str, float] = {"mut_rate" : 0, "cross_rate" : 0, "repr_rate" : 0}
         
-        self.__mut_rate_label = tk.Label(self.__genetic_params_frame, text=f"Mutation rate :")
+        self.__mut_rate_label = tk.Label(self.__genetic_params_frame, text="Mutation rate :")
         self.__mut_rate_label.pack()
         self.__mut_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__mut_rate_entry.pack()
         self.__mut_rate_entry.insert(0, 0.0)
         
-        self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text=f"Crossover rate :")
+        self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text="Crossover rate :")
         self.__cross_rate_label.pack()
         self.__cross_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__cross_rate_entry.pack()
         self.__cross_rate_entry.insert(0, 0.0)
         
-        self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text=f"Reproduction rate :")
+        self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text="Reproduction rate :")
         self.__repr_rate_label.pack()
         self.__repr_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__repr_rate_entry.pack()
@@ -71,15 +80,15 @@ class Visualisation:
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__colony_params = {"Q" : 0, "evap_rate" : 0.0}
+        self.__colony_params: dict[str, float] = {"Q" : 0, "evap_rate" : 0.0}
         
-        self.__Q_label = tk.Label(self.__colony_params_frame, text=f"Q :")
+        self.__Q_label = tk.Label(self.__colony_params_frame, text="Q :")
         self.__Q_label.pack()
         self.__Q_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__Q_entry.pack()
         self.__Q_entry.insert(0, 0.0)
         
-        self.__evap_rate_label = tk.Label(self.__colony_params_frame, text=f"Evaporation rate :")
+        self.__evap_rate_label = tk.Label(self.__colony_params_frame, text="Evaporation rate :")
         self.__evap_rate_label.pack()
         self.__evap_rate_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__evap_rate_entry.pack()
@@ -88,15 +97,15 @@ class Visualisation:
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__general_params = {"N_pop" : 0, "num_steps" : 0}
+        self.__general_params: dict[str, int] = {"N_pop" : 0, "num_steps" : 0}
         
-        self.__N_pop_label = tk.Label(self.__general_params_frame, text=f"Population size :")
+        self.__N_pop_label = tk.Label(self.__general_params_frame, text="Population size :")
         self.__N_pop_label.pack()
         self.__N_pop_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__N_pop_entry.pack()
         self.__N_pop_entry.insert(0, 0)
         
-        self.__num_steps_label = tk.Label(self.__general_params_frame, text=f"Number of steps :")
+        self.__num_steps_label = tk.Label(self.__general_params_frame, text="Number of steps :")
         self.__num_steps_label.pack()
         self.__num_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__num_steps_entry.pack()
@@ -104,7 +113,7 @@ class Visualisation:
         
         self.__root.mainloop()
         
-    def raise_error_value(self, error_msg):
+    def raise_error_value(self, error_msg: str) -> None:
         error_window = tk.Tk()
         error_window.geometry("600x100")
         error_window.title("Value error")
@@ -114,7 +123,7 @@ class Visualisation:
         msg_label.pack(side=tk.BOTTOM, expand=True)
         error_window.mainloop()
         
-    def check_entries(self):
+    def check_entries(self) -> bool:
         try:
             mut_rate = float(self.__mut_rate_entry.get())
             cross_rate = float(self.__cross_rate_entry.get())
@@ -142,11 +151,11 @@ class Visualisation:
                 return False
             
             return True
-        except:
+        except Exception:
             self.raise_error_value("Values must be int or float")
             return False
         
-    def begin(self):
+    def begin(self) -> None:
         if self.check_entries():
             self.__begin = True
             
@@ -194,22 +203,22 @@ class Visualisation:
             self.__num_steps_entry.insert(0, general_params["num_steps"])
             self.__num_steps_entry.config(state="readonly")
         
-    def get_begin(self):
+    def get_begin(self) -> bool:
         return self.__begin
     
-    def get_genetic_params(self):
+    def get_genetic_params(self) -> dict[str, float]:
         return self.__genetic_params
     
-    def get_colony_params(self):
+    def get_colony_params(self) -> dict[str, float]:
         return self.__colony_params
     
-    def get_general_params(self):
+    def get_general_params(self) -> dict[str, int]:
         return self.__general_params
     
-    def update_step(self, i):
+    def update_step(self, i: int) -> None:
         self.__step_label.config(text=f"Etape : {i}")
         
-    def set_mode_create(self):
+    def set_mode_create(self) -> None:
         self.__mode = "create"
         self.__create_mode_button.config(bg="green")
         self.__delete_edge_mode_button.config(bg="grey")
@@ -219,7 +228,7 @@ class Visualisation:
             self.change_color_node(n_cur, "blue")
         self.__node_curently_selected = None
         
-    def set_mode_delete_node(self):
+    def set_mode_delete_node(self) -> None:
         self.__mode = "delete_node"
         self.__create_mode_button.config(bg="grey")
         self.__delete_edge_mode_button.config(bg="grey")
@@ -229,7 +238,7 @@ class Visualisation:
             self.change_color_node(n_cur, "blue")
         self.__node_curently_selected = None
         
-    def set_mode_delete_edge(self):
+    def set_mode_delete_edge(self) -> None:
         self.__mode = "delete_edge"
         self.__create_mode_button.config(bg="grey")
         self.__delete_edge_mode_button.config(bg="green")
@@ -239,59 +248,120 @@ class Visualisation:
             self.change_color_node(n_cur, "blue")
         self.__node_curently_selected = None
         
-    def draw_node(self, x, y, r, id):
-        self.__drawn_nodes[(x, y)] = self.__canvas.create_oval(x-r, y-r, x+r, y+r, fill="blue")
-        self.__written_ids[(x, y)] = self.__canvas.create_text(x, y, text=id, fill="white")
+    def draw_node(
+        self,
+        x: int,
+        y: int,
+        r: int,
+        id: int
+    ) -> None:
+        self.__drawn_nodes[(x, y)] = self.__canvas.create_oval(
+            x - r,
+            y - r,
+            x + r,
+            y + r,
+            fill="blue"
+        )
+        self.__written_ids[(x, y)] = self.__canvas.create_text(
+            x,
+            y,
+            text=id,
+            fill="white"
+        )
         
-    def create_node(self, x, y, r):
-        g = self.__city_graph
+    def create_node(
+        self,
+        x: int,
+        y: int,
+        r: int
+    ) -> None:
         n = Node(x, y)
-        g.add_node(n)
+        self.__city_graph.add_node(n)
         self.draw_node(x, y, r, n.get_id())
         
-    def delete_node(self, n_new):
+    def delete_node(self, n_new: Node) -> None:
         g = self.__city_graph
         edges_from_n = g.find_edges_from_node(n_new)
         edges_to_n = g.find_edges_to_node(n_new)
         dr_e = self.__drawn_edges
         for e in edges_from_n:
             n_end = e.get_end()
-            shape = dr_e[(n_new.get_x(), n_new.get_y(), n_end.get_x(), n_end.get_y())]
+            shape = dr_e[(
+                n_new.get_x(),
+                n_new.get_y(),
+                n_end.get_x(),
+                n_end.get_y()
+            )]
             self.__canvas.delete(shape)
         for e in edges_to_n:
             n_start = e.get_start()
-            shape = dr_e[(n_start.get_x(), n_start.get_y(), n_new.get_x(), n_new.get_y())]
+            shape = dr_e[(
+                n_start.get_x(),
+                n_start.get_y(),
+                n_new.get_x(),
+                n_new.get_y()
+            )]
             self.__canvas.delete(shape)
         g.remove_node(n_new)
         dr_n = self.__drawn_nodes
-        shape = dr_n[(n_new.get_x(), n_new.get_y())]
+        shape = dr_n[(
+            n_new.get_x(),
+            n_new.get_y()
+        )]
         self.__canvas.delete(shape)
         wr_ids = self.__written_ids
-        txt = wr_ids[(n_new.get_x(), n_new.get_y())]
+        txt = wr_ids[(
+            n_new.get_x(),
+            n_new.get_y()
+        )]
         self.__canvas.delete(txt)
         
-    def change_color_node(self, n : Node, color):
+    def change_color_node(self, n: Node, color: str) -> None:
         x = n.get_x()
         y = n.get_y()
         shape = self.__drawn_nodes[(x, y)]
         self.__canvas.itemconfig(shape, fill=color)
         
-    def draw_edge(self, x1, y1, x2, y2, r):
-        v = (x2-x1, y2-y1)
-        v_size = (v[0]**2 + v[1]**2)**0.5
-        x1_tild = x1 + v[0]*r/v_size
-        y1_tild = y1 + v[1]*r/v_size
-        x2_tild = x2 - v[0]*r/v_size
-        y2_tild = y2 - v[1]*r/v_size
-        self.__drawn_edges[(x1, y1, x2, y2)]  = self.__canvas.create_line(x1_tild, y1_tild, x2_tild, y2_tild, arrow=tk.LAST, fill="orange")
+    def draw_edge(
+        self,
+        x1: int,
+        y1: int,
+        x2: int,
+        y2: int,
+        r: int
+    ) -> None:
+        v = (x2 - x1, y2 - y1)
+        v_size: float = (v[0] ** 2 + v[1] ** 2) ** .5
+        x1_tild = x1 + v[0] * r / v_size
+        y1_tild = y1 + v[1] * r / v_size
+        x2_tild = x2 - v[0] * r / v_size
+        y2_tild = y2 - v[1] * r / v_size
+        self.__drawn_edges[(x1, y1, x2, y2)] = self.__canvas.create_line(
+            x1_tild, y1_tild, x2_tild, y2_tild, arrow=tk.LAST, fill="orange"
+        )
     
-    def create_edge(self, n_cur : Node, n_new : Node, r):
+    def create_edge(
+        self,
+        n_cur: Node,
+        n_new: Node,
+        r: int
+    ) -> None:
         g = self.__city_graph
-        if not(g.find_edge(n_cur, n_new)):
+        if g.find_edge(n_cur, n_new) is None:
             g.add_edge(n_cur, n_new)
-            self.draw_edge(n_cur.get_x(), n_cur.get_y(), n_new.get_x(), n_new.get_y(), r)
+            self.draw_edge(
+                n_cur.get_x(),
+                n_cur.get_y(),
+                n_new.get_x(),
+                n_new.get_y(),
+                r
+            )
         
-    def delete_edge(self, n_cur : Node, n_new : Node):
+    def delete_edge(
+        self,
+        n_cur: Node,
+        n_new: Node
+    ) -> None:
         g = self.__city_graph
         e = g.find_edge(n_cur, n_new)
         if e:
@@ -300,8 +370,8 @@ class Visualisation:
             shape = dr_e[(n_cur.get_x(), n_cur.get_y(), n_new.get_x(), n_new.get_y())]
             self.__canvas.delete(shape)
             
-    def select_node(self, event):
-        if not(self.__begin):
+    def select_node(self, event: tk.Event) -> None:
+        if self.__begin is None:
             x = event.x
             y = event.y
             r = 25
@@ -334,7 +404,7 @@ class Visualisation:
                         self.__node_curently_selected = n_new
                         self.change_color_node(n_new, "red")
                     
-            elif not(self.new_node_selected(x, y, 2*r)):
+            elif not self.new_node_selected(x, y, 2 * r):
                 # Si on a cliqué sur un emplacement vide du dessin : on y crée (en mode création) un nouveau noeud s'il ne touche aucun autre noeud
                 if self.__mode == "create":
                     self.create_node(x, y, r)
@@ -343,21 +413,26 @@ class Visualisation:
                     # Si un autre noeud était pré-séléctionné, on le dé-selectionne
                     self.change_color_node(n_cur, "blue")
   
-    def new_node_selected(self, x, y, r):
+    def new_node_selected(
+        self,
+        x: int,
+        y: int,
+        r: int
+    ) -> Node | None:
         nodes = self.__city_graph.get_nodes()
         for n in nodes:
             xi = n.get_x()
             yi = n.get_y()
-            if (xi-x)**2 + (yi-y)**2 < r**2:
+            if (xi - x) ** 2 + (yi - y) ** 2 < r ** 2:
                 return n
         return None 
 
 class Simulation(Genetic, Colony, Visualisation):
-    def __init__(self, metric):
-        self.__city_graph = City_graph()
+    def __init__(self, metric: callable[Ant, float]):
+        self.__city_graph = CityGraph()
         Visualisation.__init__(self, self.__city_graph)
         
-        self.__steps = 0
+        self.__steps: int = 0
         while True:
             if self.get_begin():
                 break
@@ -366,27 +441,48 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__colony_params = self.get_colony_params()
         self.__general_params = self.get_general_params()
             
-        Genetic.__init__(self, self.__city_graph, self.__general_params["N_pop"], self.__genetic_params["mut_rate"], self.__genetic_params["cross_rate"], self.__genetic_params["repr_rate"], metric)
-        Colony.__init__(self, self.__city_graph, self.__general_params["N_pop"], self.__colony_params["evap_rate"], self.__colony_params["Q"], metric)
+        Genetic.__init__(
+            self,
+            self.__city_graph,
+            self.__general_params["N_pop"],
+            self.__genetic_params["mut_rate"],
+            self.__genetic_params["cross_rate"],
+            self.__genetic_params["repr_rate"],
+            metric
+        )
+        Colony.__init__(
+            self,
+            self.__city_graph,
+            self.__general_params["N_pop"],
+            self.__colony_params["evap_rate"],
+            self.__colony_params["Q"],
+            metric
+        )
             
-        print(self.__city_graph, "\n General params :", self.__general_params, "\n Genetic params :", self.__genetic_params, "\n Colony params :", self.__colony_params, "\n")
+        print(
+            self.__city_graph,
+            "\n General params :", self.__general_params,
+            "\n Genetic params :", self.__genetic_params,
+            "\n Colony params :", self.__colony_params,
+            "\n"
+        )
         self.launch(self.__general_params["num_steps"])
 
-    def get_steps(self):
+    def get_steps(self) -> int:
         return self.__steps
 
-    def step(self):
-        # todo : étape de la simualation (utilisation des méthodes de génétique et de colonies de fourmis)
+    def step(self) -> None:
+        # TODO : étape de la simualation (utilisation des méthodes de génétique et de colonies de fourmis)
         #self.update_step(self.__steps)
         self.__steps += 1
     
-    def launch(self, num_steps):
+    def launch(self, num_steps: int) -> None:
         for i in range(num_steps):
             self.step()
 
 
-#todo 
-def metric(ant : Ant):
+# TODO
+def metric(ant: Ant) -> float:
     return ant.get_L_path()
 
 s = Simulation(metric)
