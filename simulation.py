@@ -3,12 +3,13 @@ from colony import Colony
 from ant import Ant
 from city_graph import City_graph, Node
 import tkinter as tk
+from tkinter import font
 
 class Visualisation:
     def __init__(self, city_graph : City_graph):
         self.__root = tk.Tk()
         self.__root.geometry("500x500")
-        self.__root.title("Simulation TSP par colonie de fourmis et algorithmes génétiques")
+        self.__root.title("TSP simulation by ant colony and genetic algorithm")
         
         self.__canvas_frame = tk.Frame(self.__root)
         self.__canvas_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -53,36 +54,36 @@ class Visualisation:
         self.__mut_rate_label.pack()
         self.__mut_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__mut_rate_entry.pack()
-        self.__mut_rate_entry.insert(0, 0)
+        self.__mut_rate_entry.insert(0, 0.0)
         
         self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text=f"Crossover rate :")
         self.__cross_rate_label.pack()
         self.__cross_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__cross_rate_entry.pack()
-        self.__cross_rate_entry.insert(0, 0)
+        self.__cross_rate_entry.insert(0, 0.0)
         
         self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text=f"Reproduction rate :")
         self.__repr_rate_label.pack()
         self.__repr_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__repr_rate_entry.pack()
-        self.__repr_rate_entry.insert(0, 0)
+        self.__repr_rate_entry.insert(0, 0.0)
         
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__colony_params = {"Q" : 0, "evap_rate" : 0}
+        self.__colony_params = {"Q" : 0, "evap_rate" : 0.0}
         
         self.__Q_label = tk.Label(self.__colony_params_frame, text=f"Q :")
         self.__Q_label.pack()
         self.__Q_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__Q_entry.pack()
-        self.__Q_entry.insert(0, 0)
+        self.__Q_entry.insert(0, 0.0)
         
         self.__evap_rate_label = tk.Label(self.__colony_params_frame, text=f"Evaporation rate :")
         self.__evap_rate_label.pack()
         self.__evap_rate_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__evap_rate_entry.pack()
-        self.__evap_rate_entry.insert(0, 0)
+        self.__evap_rate_entry.insert(0, 0.0)
         
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
@@ -103,38 +104,95 @@ class Visualisation:
         
         self.__root.mainloop()
         
+    def raise_error_value(self, error_msg):
+        error_window = tk.Tk()
+        error_window.geometry("600x100")
+        error_window.title("Value error")
+        error_label = tk.Label(error_window, text="Value error ! Values must respect :", font=font.Font(size=4))
+        error_label.pack(side=tk.TOP, expand=True)
+        msg_label = tk.Label(error_window, text=error_msg, fg="red", font=font.Font(size=6))
+        msg_label.pack(side=tk.BOTTOM, expand=True)
+        error_window.mainloop()
+        
+    def check_entries(self):
+        try:
+            mut_rate = float(self.__mut_rate_entry.get())
+            cross_rate = float(self.__cross_rate_entry.get())
+            repr_rate = float(self.__repr_rate_entry.get())
+            if mut_rate + cross_rate + repr_rate > 1:
+                self.raise_error_value("mutation_rate + reproduction_rate + crossover_rate <= 1")
+                return False
+            if mut_rate<0 or repr_rate<0 or cross_rate<0:
+                self.raise_error_value("Values must be positives")
+                return False
+            
+            Q = float(self.__Q_entry.get())
+            evap_rate = float(self.__evap_rate_entry.get())
+            if Q<0:
+                self.raise_error_value("Values must be positives")
+                return False
+            if evap_rate<0 or evap_rate>1:
+                self.raise_error_value("0 <= evaporation_rate <= 1")
+                return False
+            
+            N_pop = int(self.__N_pop_entry.get())
+            num_steps = int(self.__num_steps_entry.get())
+            if N_pop<0 or num_steps<0:
+                self.raise_error_value("Values must be positives")
+                return False
+            
+            return True
+        except:
+            self.raise_error_value("Values must be int or float")
+            return False
+        
     def begin(self):
-        self.__begin = True
-        
-        self.__create_mode_button.config(bg="grey")
-        self.__create_mode_button.config(state = tk.DISABLED)
-        self.__delete_node_mode_button.config(bg="grey")
-        self.__delete_node_mode_button.config(state = tk.DISABLED)
-        self.__delete_edge_mode_button.config(bg="grey")
-        self.__delete_edge_mode_button.config(state = tk.DISABLED)
-        self.__begin_button.config(bg="green")
-        self.__begin_button.config(text="Started")
-        self.__begin_button.config(state=tk.DISABLED)
-        
-        genetic_params = self.__genetic_params
-        genetic_params["mut_rate"] = float(self.__mut_rate_entry.get())
-        self.__mut_rate_entry.config(state="readonly")
-        genetic_params["cross_rate"] = float(self.__cross_rate_entry.get())
-        self.__cross_rate_entry.config(state="readonly")
-        genetic_params["repr_rate"] = float(self.__repr_rate_entry.get())
-        self.__repr_rate_entry.config(state="readonly")
-        
-        colony_params = self.__colony_params
-        colony_params["Q"] = float(self.__Q_entry.get())
-        self.__Q_entry.config(state="readonly")
-        colony_params["evap_rate"] = float(self.__evap_rate_entry.get())
-        self.__evap_rate_entry.config(state="readonly")
-        
-        general_params = self.__general_params
-        general_params["N_pop"] = int(self.__N_pop_entry.get())
-        self.__N_pop_entry.config(state="readonly")
-        general_params["num_steps"] = int(self.__num_steps_entry.get())
-        self.__num_steps_entry.config(state="readonly")
+        if self.check_entries():
+            self.__begin = True
+            
+            self.__create_mode_button.config(bg="grey")
+            self.__create_mode_button.config(state = tk.DISABLED)
+            self.__delete_node_mode_button.config(bg="grey")
+            self.__delete_node_mode_button.config(state = tk.DISABLED)
+            self.__delete_edge_mode_button.config(bg="grey")
+            self.__delete_edge_mode_button.config(state = tk.DISABLED)
+            self.__begin_button.config(bg="green")
+            self.__begin_button.config(text="Started")
+            self.__begin_button.config(state=tk.DISABLED)
+            
+            genetic_params = self.__genetic_params
+            genetic_params["mut_rate"] = float(self.__mut_rate_entry.get())
+            self.__mut_rate_entry.delete(0, tk.END)
+            self.__mut_rate_entry.insert(0, genetic_params["mut_rate"])
+            self.__mut_rate_entry.config(state="readonly")
+            genetic_params["cross_rate"] = float(self.__cross_rate_entry.get())
+            self.__cross_rate_entry.delete(0, tk.END)
+            self.__cross_rate_entry.insert(0, genetic_params["cross_rate"])
+            self.__cross_rate_entry.config(state="readonly")
+            genetic_params["repr_rate"] = float(self.__repr_rate_entry.get())
+            self.__repr_rate_entry.delete(0, tk.END)
+            self.__repr_rate_entry.insert(0, genetic_params["repr_rate"])
+            self.__repr_rate_entry.config(state="readonly")
+            
+            colony_params = self.__colony_params
+            colony_params["Q"] = float(self.__Q_entry.get())
+            self.__Q_entry.delete(0, tk.END)
+            self.__Q_entry.insert(0, colony_params["Q"])
+            self.__Q_entry.config(state="readonly")
+            colony_params["evap_rate"] = float(self.__evap_rate_entry.get())
+            self.__evap_rate_entry.delete(0, tk.END)
+            self.__evap_rate_entry.insert(0, colony_params["evap_rate"])
+            self.__evap_rate_entry.config(state="readonly")
+            
+            general_params = self.__general_params
+            general_params["N_pop"] = int(self.__N_pop_entry.get())
+            self.__N_pop_entry.delete(0, tk.END)
+            self.__N_pop_entry.insert(0, general_params["N_pop"])
+            self.__N_pop_entry.config(state="readonly")
+            general_params["num_steps"] = int(self.__num_steps_entry.get())
+            self.__num_steps_entry.delete(0, tk.END)
+            self.__num_steps_entry.insert(0, general_params["num_steps"])
+            self.__num_steps_entry.config(state="readonly")
         
     def get_begin(self):
         return self.__begin
