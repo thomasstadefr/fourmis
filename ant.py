@@ -6,13 +6,13 @@ class Ant:
         self,
         city_graph: CityGraph,
         pos_init: Node,
-        metric: callable[Self, float]
+        metric #: callable[Self, float]
     ):
         self.__city_graph = city_graph
         self.__pos: Node = pos_init
         self.__path: list[Node] = [pos_init]
         self.__L_path: float = 0
-        self.__metric: callable[Self, float] = metric
+        self.__metric = metric #: callable[Self, float]
         self.__score: float = self.__metric(self)
 
     def get_pos(self) -> Node:

@@ -40,12 +40,12 @@ class Genetic:
         mut_rate: float,
         cross_rate: float,
         repr_rate: float,
-        metric: callable[Ant, float]
+        metric #: callable[Ant, float]
     ):
         self.__mut_rate: float = mut_rate
         self.__cross_rate: float = cross_rate
         self.__repr_rate: float = repr_rate
-        self.__metric: callable[Ant, float] = metric
+        self.__metric = metric #: callable[Ant, float]
         self.__N_pop: int = N_pop
         self.__population: list[Ant] = [Ant(city_graph, 0, metric) for _ in range(N_pop)] # TODO
         self.rank_pop()

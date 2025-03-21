@@ -428,7 +428,7 @@ class Visualisation:
         return None 
 
 class Simulation(Genetic, Colony, Visualisation):
-    def __init__(self, metric: callable[Ant, float]):
+    def __init__(self, metric): #: callable[Ant, float]
         self.__city_graph = CityGraph()
         Visualisation.__init__(self, self.__city_graph)
         

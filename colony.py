@@ -8,7 +8,7 @@ class Colony:
         N_pop: int,
         evap_rate: float,
         Q: float,
-        metric: callable[Ant, float]
+        metric #: callable[Ant, float]
     ):
         self.__city_graph: CityGraph = city_graph
         self.__N_pop: int = N_pop
