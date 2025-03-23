@@ -1,9 +1,9 @@
+import tkinter as tk
+from tkinter import font
 from genetic import Genetic
 from colony import Colony
 from ant import Ant
 from city_graph import CityGraph, Node
-import tkinter as tk
-from tkinter import font
 
 class Visualisation:
     def __init__(self, city_graph: CityGraph):

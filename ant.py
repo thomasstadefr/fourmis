@@ -1,3 +1,4 @@
+from random import choices
 from typing import Self
 from city_graph import Node, CityGraph
 
@@ -32,8 +33,14 @@ class Ant:
 
     def next_city(self) -> Node:
         # TODO : choose next city to visit
-        pass
-    
+        edges = CityGraph.find_edges_from_node(
+            self.__city_graph,
+            self.__pos
+        )
+        pheromones = [edge.get_pheromone() for edge in edges]
+        next_edge = choices(edges, pheromones)[0]
+        return next_edge.get_end()
+
     def move(self) -> None:
         start = self.__pos
         end = self.next_city()
