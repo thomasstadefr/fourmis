@@ -1,3 +1,4 @@
+from random import choices
 from ant import Ant
 from city_graph import CityGraph
 
@@ -14,7 +15,11 @@ class Colony:
         self.__N_pop: int = N_pop
         self.__evap_rate: float = evap_rate
         self.__Q: float = Q
-        self.__population: list[Ant] = [Ant(city_graph, 0, metric) for _ in range(N_pop)] # TODO
+
+        city_nodes = city_graph.get_nodes()
+        ant_nodes = choices(city_nodes, N_pop)
+        self.__population: list[Ant] = [Ant(city_graph, node, metric) for node in ant_nodes]
+
 
     def evaporation(self) -> None:
         edges = self.__city_graph.get_edges()
@@ -22,6 +27,7 @@ class Colony:
             e.set_pheromone(
                 (1 - self.__evap_rate) * e.get_pheromone()
             )
+
 
     def created_pheromone(self) -> None:                
         for ant in self.__population:
@@ -33,10 +39,10 @@ class Colony:
                 end = path[i + 1]
                 e = self.__city_graph.find_edge(start, end)
                 e.set_pheromone(e.get_pheromone() + delta)
-            
+
+    
     def step(self) -> None:
         for ant in self.__population:
             ant.trip()
-            
         self.evaporation()
         self.created_pheromone()

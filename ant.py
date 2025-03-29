@@ -32,7 +32,6 @@ class Ant:
         self.__score: float = self.__metric(self)
 
     def next_city(self) -> Node:
-        # TODO : choose next city to visit
         edges = CityGraph.find_edges_from_node(
             self.__city_graph,
             self.__pos
