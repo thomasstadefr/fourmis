@@ -85,10 +85,14 @@ class Ant:
             self.move()
             if self.__num_visited == N_v and self.get_pos() == self.get_pos_init():  # Condition de complétude d'une tournée
                 break
+            
+    def __str__(self):
+        return f"q : {self.__q}, alpha : {self.__alpha}, beta : {self.__beta}, path : {self.__path}, score : {self.__score}"
+         
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     city_nodes = city_graph.get_nodes()
-    ant_nodes = random.choices(city_nodes, N_pop)
+    ant_nodes = random.choices(city_nodes, k=N_pop)
     return [random_ant(city_graph, node, metric) for node in ant_nodes]
                 
 def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:

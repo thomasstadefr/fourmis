@@ -465,13 +465,7 @@ class Simulation(Genetic, Colony, Visualisation):
             metric
         )
             
-        print(
-            self.__city_graph,
-            "\n General params :", self.__general_params,
-            "\n Genetic params :", self.__genetic_params,
-            "\n Colony params :", self.__colony_params,
-            "\n"
-        )
+        print(self)
         self.launch(self.__general_params["num_steps"])
 
     def get_steps(self) -> int:
@@ -485,7 +479,16 @@ class Simulation(Genetic, Colony, Visualisation):
     def launch(self, num_steps: int) -> None:
         for i in range(num_steps):
             self.step()
-
+            
+    def __str__(self):
+        return f""" 
+            {self.__city_graph},
+            \n General params : {self.__general_params},
+            \n Genetic params : {self.__genetic_params},
+            \n Colony params : {self.__colony_params},
+            \n Population : {[str(ant) for ant in self.__population]}
+            \n
+            """
 
 # TODO
 def metric(ant: Ant) -> float:
