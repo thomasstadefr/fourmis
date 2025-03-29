@@ -1,14 +1,22 @@
 import random
 from typing import Self
-from city_graph import Node, CityGraph
+from city_graph import Edge, Node, CityGraph
 
 class Ant:
+    q0:float = 0.5
+    
     def __init__(
         self,
         city_graph: CityGraph,
         pos_init: Node,
+        q: float,
+        alpha: float,
+        beta: float,
         metric #: callable[Self, float]
     ):
+        self.__q = q 
+        self.__alpha = alpha
+        self.__beta = beta
         self.__city_graph = city_graph
         self.__path: list[Node] = [pos_init]
         self.__num_visited: int = 1
@@ -33,14 +41,29 @@ class Ant:
     
     def update_score(self) -> None:
         self.__score: float = self.__metric(self)
+        
+    def score_choices(self) -> tuple[list[Edge], list[float]]:
+        r = self.get_pos()
+        g = self.__city_graph
+        l_edges = g.find_edges_from_node(r)
+        l_scores = []
+        max_score = 0
+        for e in l_edges:
+            tau = e.get_pheromone()
+            eta = 1 / e.get_distance()
+            score = tau**self.__alpha * eta**self.__beta
+            l_scores.append(score)
+            if score > max_score:
+                max_score = score
+                max_edge = e
+        return (l_edges, l_scores, max_edge)
 
     def next_city(self) -> Node:
-        edges = CityGraph.find_edges_from_node(
-            self.__city_graph,
-            self.get_pos()
-        )
-        pheromones = [edge.get_pheromone() for edge in edges]
-        next_edge = random.choices(edges, pheromones)[0]
+        l_edges, l_scores, max_edge = self.score_choices()
+        if self.__q <= Ant.q0:
+            next_edge = random.choices(l_edges, l_scores)[0]
+        else:
+            next_edge = max_edge
         return next_edge.get_end()
 
     def move(self) -> None:
@@ -62,5 +85,14 @@ class Ant:
             self.move()
             if self.__num_visited == N_v and self.get_pos() == self.get_pos_init():  # Condition de complétude d'une tournée
                 break
+         
+def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
+    city_nodes = city_graph.get_nodes()
+    ant_nodes = random.choices(city_nodes, N_pop)
+    return [random_ant(city_graph, node, metric) for node in ant_nodes]
                 
-        
+def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
+    q = random.random()
+    alpha = random.random()
+    beta = random.random()
+    return Ant(city_graph, node, q, alpha, beta, metric)

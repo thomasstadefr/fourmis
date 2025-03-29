@@ -6,6 +6,7 @@ class Colony:
     def __init__(
         self,
         city_graph: CityGraph,
+        population: list[Ant],
         N_pop: int,
         evap_rate: float,
         Q: float,
@@ -16,9 +17,7 @@ class Colony:
         self.__evap_rate: float = evap_rate
         self.__Q: float = Q
 
-        city_nodes = city_graph.get_nodes()
-        ant_nodes = random.choices(city_nodes, N_pop)
-        self.__population: list[Ant] = [Ant(city_graph, node, metric) for node in ant_nodes]
+        self.__population: list[Ant] = population
 
 
     def evaporation(self) -> None:

@@ -36,6 +36,7 @@ class Genetic:
     def __init__(
         self,
         city_graph : CityGraph,
+        population: list[Ant],
         N_pop: int,
         mut_rate: float,
         cross_rate: float,
@@ -47,7 +48,7 @@ class Genetic:
         self.__repr_rate: float = repr_rate
         self.__metric = metric #: callable[Ant, float]
         self.__N_pop: int = N_pop
-        self.__population: list[Ant] = [Ant(city_graph, 0, metric) for _ in range(N_pop)] # TODO
+        self.__population: list[Ant] = population
         self.rank_pop()
 
     def mutation(self, ant: Ant) -> Ant: 

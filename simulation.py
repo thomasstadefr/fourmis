@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import font
 from genetic import Genetic
 from colony import Colony
-from ant import Ant
+from ant import Ant, random_population
 from city_graph import CityGraph, Node
 
 class Visualisation:
@@ -440,10 +440,15 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__genetic_params = self.get_genetic_params()
         self.__colony_params = self.get_colony_params()
         self.__general_params = self.get_general_params()
+        
+        self.__N_pop = self.__general_params["N_pop"]
+        self.__metric = metric
+        self.__population = random_population(self.__city_graph, self.__N_pop, self.__metric)
             
         Genetic.__init__(
             self,
             self.__city_graph,
+            self.__population,
             self.__general_params["N_pop"],
             self.__genetic_params["mut_rate"],
             self.__genetic_params["cross_rate"],
@@ -453,6 +458,7 @@ class Simulation(Genetic, Colony, Visualisation):
         Colony.__init__(
             self,
             self.__city_graph,
+            self.__population,
             self.__general_params["N_pop"],
             self.__colony_params["evap_rate"],
             self.__colony_params["Q"],
