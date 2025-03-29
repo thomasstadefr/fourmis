@@ -35,6 +35,7 @@ class Edge:
         start: Node,
         end: Node
     ): 
+        assert start != end, f"Boucle sur le noeud {start} !"
         self.__pheromone: float = 0
         self.__distance: float = (
             (start.get_x() - end.get_x()) ** 2

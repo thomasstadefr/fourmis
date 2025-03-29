@@ -1,4 +1,4 @@
-from random import choices
+import random
 from ant import Ant
 from city_graph import CityGraph
 
@@ -17,7 +17,7 @@ class Colony:
         self.__Q: float = Q
 
         city_nodes = city_graph.get_nodes()
-        ant_nodes = choices(city_nodes, N_pop)
+        ant_nodes = random.choices(city_nodes, N_pop)
         self.__population: list[Ant] = [Ant(city_graph, node, metric) for node in ant_nodes]
 
 
@@ -40,7 +40,7 @@ class Colony:
                 e = self.__city_graph.find_edge(start, end)
                 e.set_pheromone(e.get_pheromone() + delta)
 
-    
+
     def step(self) -> None:
         for ant in self.__population:
             ant.trip()
