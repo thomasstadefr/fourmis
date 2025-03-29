@@ -371,7 +371,7 @@ class Visualisation:
             self.__canvas.delete(shape)
             
     def select_node(self, event: tk.Event) -> None:
-        if self.__begin is None:
+        if not self.__begin:
             x = event.x
             y = event.y
             r = 25
