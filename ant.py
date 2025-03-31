@@ -23,7 +23,10 @@ class Ant:
         self.__L_path: float = 0
         self.__metric = metric #: callable[Self, float]
         self.__score: float = self.__metric(self)
-        self.__finished: bool
+        self.__finished: bool = False
+        
+    def is_finished(self):
+        return self.__finished
 
     def get_pos(self) -> Node:
         return self.__path[-1]
