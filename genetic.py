@@ -1,4 +1,4 @@
-from ant import Ant
+from ant import Ant, random_ant
 from city_graph import CityGraph
 from random import uniform
 
@@ -48,13 +48,14 @@ class Genetic:
         self.__repr_rate: float = repr_rate
         self.__metric = metric #: callable[Ant, float]
         self.__N_pop: int = N_pop
+        self.__city_graph = city_graph
         self.__population: list[Ant] = population
         self.rank_pop()
 
     def mutation(self, ant: Ant) -> Ant: 
-        # TODO: remplacement des individus les mois performants par des individus générés uniformément
-        # utiliser uniform(a, b)
-        pass
+        del(ant)
+        new_node = self.__city_graph.random_nodes(1)[0]
+        return random_ant(self.__city_graph, new_node, self.__metric)
 
     def crossover(self, ant: Ant) -> Ant:
         # TODO: petite mutation des individus relativement performants autour du meilleur individu 

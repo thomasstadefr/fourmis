@@ -488,6 +488,7 @@ class Simulation(Genetic, Colony, Visualisation):
         # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
         N_genetic_steps = self.__N_genetic_steps
         N_colony_steps_each_generation = self.__N_colony_steps_each_generation
+        
         for i in range(N_genetic_steps):
             for j in range(N_colony_steps_each_generation):
                 self.colony_step()

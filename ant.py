@@ -95,8 +95,7 @@ class Ant:
          
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
-    city_nodes = city_graph.get_nodes()
-    ant_nodes = random.choices(city_nodes, k=N_pop)
+    ant_nodes = city_graph.random_nodes(N_pop)
     return [random_ant(city_graph, node, metric) for node in ant_nodes]
                 
 def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:

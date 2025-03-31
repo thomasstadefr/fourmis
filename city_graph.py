@@ -1,4 +1,5 @@
 from typing import Self
+import random
 
 class Node:
     id: int = 0
@@ -100,6 +101,9 @@ class CityGraph:
             self.remove_edge(e)
         del(n)
         self.__N_v -= 1
+        
+    def random_nodes(self, k_nodes):
+        return random.choices(self.__nodes, k=k_nodes)
     
     def find_edge(self, start: Node, end: Node) -> Edge | None:
         for e in self.__edges:
