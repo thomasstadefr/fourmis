@@ -22,12 +22,7 @@ class Colony:
         self.__population: list[Ant] = population
 
     def evaporation(self) -> None:
-        edges = self.__city_graph.get_edges()
-        for e in edges:
-            e.set_pheromone(
-                (1 - self.__evap_rate) * e.get_pheromone()
-            )
-
+        self.__city_graph.evaporate(self.__evap_rate)
 
     def created_pheromone(self) -> None:                
         for ant in self.__population:

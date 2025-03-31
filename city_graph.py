@@ -59,6 +59,9 @@ class Edge:
     
     def set_pheromone(self, pheromone: float) -> None:
         self.__pheromone = pheromone
+    
+    def evaporate(self, evap_rate: float) -> None:
+        self.__pheromone *= 1 - evap_rate
         
     def __eq__(self, edge: Self) -> bool:
         return self.__start == edge.get_start() and self.__end == edge.get_end()
@@ -135,6 +138,10 @@ class CityGraph:
         self.__edges.remove(e)
         del(e)
         self.__N_e -= 1
+    
+    def evaporate(self, evap_rate: float) -> None:
+        for e in self.__edges:
+            e.evaporate(evap_rate)
     
     def kosaraju(self) -> bool:
         # TODO: prend le graphe et retourne si oui ou non il est fortement connexe

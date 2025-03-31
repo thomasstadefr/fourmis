@@ -25,7 +25,7 @@ class Ant:
         self.__score: float = self.__metric(self)
         self.__finished: bool = False
         
-    def is_finished(self):
+    def is_finished(self) -> bool:
         return self.__finished
 
     def get_pos(self) -> Node:
