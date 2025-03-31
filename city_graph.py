@@ -64,7 +64,7 @@ class Edge:
         return self.__start == edge.get_start() and self.__end == edge.get_end()
     
     def __str__(self) -> str:
-        return f"({self.get_start().get_id()}, {self.get_end().get_id()})"
+        return f"({self.get_start().get_id()}, {self.get_end().get_id()}), ph = {self.get_pheromone()}"
     
     
         

@@ -495,9 +495,7 @@ class Simulation(Genetic, Colony, Visualisation):
             
         print(self)
         self.launch()
-
-    def get_steps(self) -> int:
-        return self.__steps
+        print(self)
 
     def launch(self) -> None:
         # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
