@@ -481,12 +481,18 @@ class Simulation(Genetic, Colony, Visualisation):
             self.step()
             
     def __str__(self):
+        txt_population = "["
+        for ant in self.__population:
+            txt_population += "\n"
+            txt_population += str(ant)
+        txt_population += "]"
+        
         return f""" 
-            {self.__city_graph},
-            \n General params : {self.__general_params},
-            \n Genetic params : {self.__genetic_params},
-            \n Colony params : {self.__colony_params},
-            \n Population : {[str(ant) for ant in self.__population]}
+            {self.__city_graph}
+            \n General params : {self.__general_params}
+            Genetic params : {self.__genetic_params}
+            Colony params : {self.__colony_params}
+            \n Population : {txt_population}
             \n
             """
 

@@ -87,7 +87,12 @@ class Ant:
                 break
             
     def __str__(self):
-        return f"q : {self.__q}, alpha : {self.__alpha}, beta : {self.__beta}, path : {self.__path}, score : {self.__score}"
+        txt_path = "["
+        for node in self.__path:
+            txt_path += str(node.get_id())
+            txt_path += ","
+        txt_path += "]"
+        return f"q : {self.__q}, alpha : {self.__alpha}, beta : {self.__beta}, path : {txt_path}, score : {self.__score}"
          
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
