@@ -1,4 +1,4 @@
-import random
+#import random
 from ant import Ant
 from city_graph import CityGraph
 

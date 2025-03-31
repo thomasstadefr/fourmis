@@ -131,6 +131,10 @@ class CityGraph:
         self.__edges.remove(e)
         del(e)
         self.__N_e -= 1
+    
+    def kosaraju(self) -> bool:
+        # TODO: prend le graphe et retourne si oui ou non il est fortement connexe
+        pass
         
     def __str__(self) -> str:
         txt_nodes: str = "Nodes : "

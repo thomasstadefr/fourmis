@@ -1,5 +1,5 @@
 import random
-from typing import Self
+#from typing import Self
 from city_graph import Edge, Node, CityGraph
 
 class Ant:
@@ -42,21 +42,20 @@ class Ant:
     def update_score(self) -> None:
         self.__score: float = self.__metric(self)
         
-    def score_choices(self) -> tuple[list[Edge], list[float]]:
+    def score_choices(self) -> tuple[list[Edge], list[float], Edge]:
         r = self.get_pos()
-        g = self.__city_graph
-        l_edges = g.find_edges_from_node(r)
-        l_scores = []
+        l_edges = self.__city_graph.find_edges_from_node(r)
+        l_scores: list[float] = []
         max_score = 0
         for e in l_edges:
             tau = e.get_pheromone()
             eta = 1 / e.get_distance()
-            score = tau**self.__alpha * eta**self.__beta
+            score: float = tau ** self.__alpha * eta ** self.__beta
             l_scores.append(score)
             if score > max_score:
                 max_score = score
                 max_edge = e
-        return (l_edges, l_scores, max_edge)
+        return l_edges, l_scores, max_edge
 
     def next_city(self) -> Node:
         l_edges, l_scores, max_edge = self.score_choices()
@@ -71,7 +70,7 @@ class Ant:
         end = self.next_city()
         edge = self.__city_graph.find_edge(start, end)
         
-        if not(end in self.__path):
+        if end not in self.__path:
             self.__num_visited += 1
         self.__path.append(end)
         self.__L_path += edge.get_distance()
