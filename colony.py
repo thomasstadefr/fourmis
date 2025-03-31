@@ -31,7 +31,7 @@ class Colony:
 
     def created_pheromone(self) -> None:                
         for ant in self.__population:
-            if ant.__finished:
+            if ant.is_finished():
                 path = ant.get_path()
                 delta = self.__Q / ant.get_L_path()
                 
