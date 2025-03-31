@@ -46,6 +46,9 @@ class Ant:
         r = self.get_pos()
         l_edges = self.__city_graph.find_edges_from_node(r)
         l_scores: list[float] = []
+        assert len(l_edges) > 0, "Graphe non fortement connexe"
+        
+        max_edge = l_edges[0]
         max_score = 0
         for e in l_edges:
             tau = e.get_pheromone()
