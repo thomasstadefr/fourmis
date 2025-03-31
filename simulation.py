@@ -97,7 +97,7 @@ class Visualisation:
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__general_params: dict[str, int] = {"N_pop" : 0, "num_steps" : 0}
+        self.__general_params: dict[str, int] = {"N_pop" : 0, "num_genetic_steps" : 0, "num_colony_steps": 0}
         
         self.__N_pop_label = tk.Label(self.__general_params_frame, text="Population size :")
         self.__N_pop_label.pack()
@@ -105,11 +105,17 @@ class Visualisation:
         self.__N_pop_entry.pack()
         self.__N_pop_entry.insert(0, 0)
         
-        self.__num_steps_label = tk.Label(self.__general_params_frame, text="Number of steps :")
-        self.__num_steps_label.pack()
-        self.__num_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
-        self.__num_steps_entry.pack()
-        self.__num_steps_entry.insert(0, 0)
+        self.__num_genetic_steps_label = tk.Label(self.__general_params_frame, text="Number of genetic steps :")
+        self.__num_genetic_steps_label.pack()
+        self.__num_genetic_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
+        self.__num_genetic_steps_entry.pack()
+        self.__num_genetic_steps_entry.insert(0, 0)
+
+        self.__num_colony_steps_label = tk.Label(self.__general_params_frame, text="Number of colony steps each generation :")
+        self.__num_colony_steps_label.pack()
+        self.__num_colony_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
+        self.__num_colony_steps_entry.pack()
+        self.__num_colony_steps_entry.insert(0, 0)
         
         self.__root.mainloop()
         
@@ -145,8 +151,9 @@ class Visualisation:
                 return False
             
             N_pop = int(self.__N_pop_entry.get())
-            num_steps = int(self.__num_steps_entry.get())
-            if N_pop<0 or num_steps<0:
+            num_genetic_steps = int(self.__num_genetic_steps_entry.get())
+            num_colony_steps = int(self.__num_colony_steps_entry.get())
+            if N_pop < 0 or num_genetic_steps < 0 or num_colony_steps < 0:
                 self.raise_error_value("Values must be positives")
                 return False
             
@@ -198,10 +205,14 @@ class Visualisation:
             self.__N_pop_entry.delete(0, tk.END)
             self.__N_pop_entry.insert(0, general_params["N_pop"])
             self.__N_pop_entry.config(state="readonly")
-            general_params["num_steps"] = int(self.__num_steps_entry.get())
-            self.__num_steps_entry.delete(0, tk.END)
-            self.__num_steps_entry.insert(0, general_params["num_steps"])
-            self.__num_steps_entry.config(state="readonly")
+            general_params["num_genetic_steps"] = int(self.__num_genetic_steps_entry.get())
+            general_params["num_colony_steps"] = int(self.__num_colony_steps_entry.get())
+            self.__num_genetic_steps_entry.delete(0, tk.END)
+            self.__num_genetic_steps_entry.insert(0, general_params["num_genetic_steps"])
+            self.__num_genetic_steps_entry.config(state="readonly")
+            self.__num_colony_steps_entry.delete(0, tk.END)
+            self.__num_colony_steps_entry.insert(0, general_params["num_colony_steps"])
+            self.__num_colony_steps_entry.config(state="readonly")
         
     def get_begin(self) -> bool:
         return self.__begin
@@ -442,8 +453,8 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__general_params = self.get_general_params()
         
         self.__N_pop = self.__general_params["N_pop"]
-        self.__N_genetic_steps = self.__general_params["N_genetic_steps"]
-        self.__N_colony_steps_each_generation = self.__general_params["N_colony_steps_each_generation"]
+        self.__N_genetic_steps = self.__general_params["num_genetic_steps"]
+        self.__N_colony_steps_each_generation = self.__general_params["num_colony_steps"]
         self.__metric = metric
         self.__population = random_population(self.__city_graph, self.__N_pop, self.__metric)
             
@@ -468,7 +479,7 @@ class Simulation(Genetic, Colony, Visualisation):
         )
             
         print(self)
-        self.launch(self.__general_params["num_steps"])
+        self.launch()
 
     def get_steps(self) -> int:
         return self.__steps
