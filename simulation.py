@@ -442,6 +442,8 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__general_params = self.get_general_params()
         
         self.__N_pop = self.__general_params["N_pop"]
+        self.__N_genetic_steps = self.__general_params["N_genetic_steps"]
+        self.__N_colony_steps_each_generation = self.__general_params["N_colony_steps_each_generation"]
         self.__metric = metric
         self.__population = random_population(self.__city_graph, self.__N_pop, self.__metric)
             
@@ -471,14 +473,14 @@ class Simulation(Genetic, Colony, Visualisation):
     def get_steps(self) -> int:
         return self.__steps
 
-    def step(self) -> None:
-        # TODO : étape de la simualation (utilisation des méthodes de génétique et de colonies de fourmis)
-        #self.update_step(self.__steps)
-        self.__steps += 1
-    
-    def launch(self, num_steps: int) -> None:
-        for i in range(num_steps):
-            self.step()
+    def launch(self) -> None:
+        # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
+        N_genetic_steps = self.__N_genetic_steps
+        N_colony_steps_each_generation = self.__N_colony_steps_each_generation
+        for i in range(N_genetic_steps):
+            for j in range(N_colony_steps_each_generation):
+                self.colony_step()
+            self.genetic_step()
             
     def __str__(self):
         txt_population = "["
@@ -489,14 +491,12 @@ class Simulation(Genetic, Colony, Visualisation):
         
         return f""" 
             {self.__city_graph}
-            \n General params : {self.__general_params}
-            Genetic params : {self.__genetic_params}
-            Colony params : {self.__colony_params}
-            \n Population : {txt_population}
+            \n General params : {self.__general_params} \nGenetic params : {self.__genetic_params} \nColony params : {self.__colony_params}
+            \nPopulation : {txt_population}
             \n
             """
 
-# TODO
+# TODO (à améliorer mais marche déjà)
 def metric(ant: Ant) -> float:
     return ant.get_L_path()
 

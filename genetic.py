@@ -67,7 +67,7 @@ class Genetic:
     def rank_pop(self) -> None:
         merge_sort_ants(self.__population)
         
-    def step(self) -> None:
+    def genetic_step(self) -> None:
         pop = self.__population
         self.rank_pop()
 

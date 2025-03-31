@@ -40,7 +40,7 @@ class Colony:
                 e.set_pheromone(e.get_pheromone() + delta)
 
 
-    def step(self) -> None:
+    def colony_step(self) -> None:
         for ant in self.__population:
             ant.trip()
         self.evaporation()
