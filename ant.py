@@ -23,6 +23,7 @@ class Ant:
         self.__L_path: float = 0
         self.__metric = metric #: callable[Self, float]
         self.__score: float = self.__metric(self)
+        self.__finished: bool
 
     def get_pos(self) -> Node:
         return self.__path[-1]
@@ -79,14 +80,17 @@ class Ant:
         self.__L_path += edge.get_distance()
         self.update_score()
         
-    def trip(self) -> None:
+    def trip(self) -> bool:
+        # Renvoie si la fourmi a réussi
         # Autant de pas à faire que nombre de villes : une étape corrspond à un trajet complet 
         N_v = self.__city_graph.get_N_v()
-        N_steps_max = 2*N_v
+        N_steps_max = 2 * N_v
         for _ in range(N_steps_max):
             self.move()
             if self.__num_visited == N_v and self.get_pos() == self.get_pos_init():  # Condition de complétude d'une tournée
+                self.__finished = True
                 break
+        self.__finished = False
             
     def __str__(self):
         txt_path = "["

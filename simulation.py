@@ -80,7 +80,7 @@ class Visualisation:
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__colony_params: dict[str, float] = {"Q" : 0, "evap_rate" : 0.0}
+        self.__colony_params: dict[str, float] = {"Q" : 0.0, "evap_rate" : 0.0, "init_pheromone": 0.0}
         
         self.__Q_label = tk.Label(self.__colony_params_frame, text="Q :")
         self.__Q_label.pack()
@@ -93,6 +93,12 @@ class Visualisation:
         self.__evap_rate_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__evap_rate_entry.pack()
         self.__evap_rate_entry.insert(0, 0.0)
+
+        self.__init_pheromone_label = tk.Label(self.__colony_params_frame, text="Initial pheromone :")
+        self.__init_pheromone_label.pack()
+        self.__init_pheromone_entry = tk.Entry(self.__colony_params_frame, justify="center")
+        self.__init_pheromone_entry.pack()
+        self.__init_pheromone_entry.insert(0, 0.0)
         
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
@@ -143,11 +149,15 @@ class Visualisation:
             
             Q = float(self.__Q_entry.get())
             evap_rate = float(self.__evap_rate_entry.get())
-            if Q<0:
-                self.raise_error_value("Values must be positives")
+            init_pheromone = float(self.__init_pheromone_entry.get())
+            if Q < 0:
+                self.raise_error_value("Value of Q must be positive")
                 return False
-            if evap_rate<0 or evap_rate>1:
-                self.raise_error_value("0 <= evaporation_rate <= 1")
+            if evap_rate <= 0 or evap_rate >= 1:
+                self.raise_error_value("0 < evaporation_rate < 1")
+                return False
+            if init_pheromone < 0:
+                self.raise_error_value("Value of tau_0 (initial pheromone) must be positive")
                 return False
             
             N_pop = int(self.__N_pop_entry.get())
@@ -199,6 +209,10 @@ class Visualisation:
             self.__evap_rate_entry.delete(0, tk.END)
             self.__evap_rate_entry.insert(0, colony_params["evap_rate"])
             self.__evap_rate_entry.config(state="readonly")
+            colony_params["init_pheromone"] = float(self.__init_pheromone_entry.get())
+            self.__init_pheromone_entry.delete(0, tk.END)
+            self.__init_pheromone_entry.insert(0, colony_params["init_pheromone"])
+            self.__init_pheromone_entry.config(state="readonly")
             
             general_params = self.__general_params
             general_params["N_pop"] = int(self.__N_pop_entry.get())
@@ -475,6 +489,7 @@ class Simulation(Genetic, Colony, Visualisation):
             self.__general_params["N_pop"],
             self.__colony_params["evap_rate"],
             self.__colony_params["Q"],
+            self.__colony_params["init_pheromone"],
             metric
         )
             

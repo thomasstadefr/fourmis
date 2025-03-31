@@ -35,7 +35,7 @@ class Edge:
         self,
         start: Node,
         end: Node
-    ): 
+    ):
         assert start != end, f"Boucle sur le noeud {start} !"
         self.__pheromone: float = 0
         self.__distance: float = (

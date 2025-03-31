@@ -10,15 +10,16 @@ class Colony:
         N_pop: int,
         evap_rate: float,
         Q: float,
+        init_pheromone: float,
         metric #: callable[Ant, float]
     ):
         self.__city_graph: CityGraph = city_graph
+        for edge in city_graph.get_edges():
+            edge.set_pheromone(init_pheromone)
         self.__N_pop: int = N_pop
         self.__evap_rate: float = evap_rate
         self.__Q: float = Q
-
         self.__population: list[Ant] = population
-
 
     def evaporation(self) -> None:
         edges = self.__city_graph.get_edges()
@@ -30,14 +31,15 @@ class Colony:
 
     def created_pheromone(self) -> None:                
         for ant in self.__population:
-            path = ant.get_path()
-            delta = self.__Q / ant.get_L_path()
-            
-            for i in range(len(path) - 1):                    
-                start = path[i]
-                end = path[i + 1]
-                e = self.__city_graph.find_edge(start, end)
-                e.set_pheromone(e.get_pheromone() + delta)
+            if ant.__finished:
+                path = ant.get_path()
+                delta = self.__Q / ant.get_L_path()
+                
+                for i in range(len(path) - 1):                    
+                    start = path[i]
+                    end = path[i + 1]
+                    e = self.__city_graph.find_edge(start, end)
+                    e.set_pheromone(e.get_pheromone() + delta)
 
 
     def colony_step(self) -> None:
@@ -45,3 +47,4 @@ class Colony:
             ant.trip()
         self.evaporation()
         self.created_pheromone()
+        
