@@ -496,7 +496,6 @@ class Simulation(Genetic, Colony, Visualisation):
             
         print(self)
         self.launch()
-        print(self)
 
     def launch(self) -> None:
         # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
@@ -506,24 +505,26 @@ class Simulation(Genetic, Colony, Visualisation):
         for i in range(N_genetic_steps):
             for j in range(N_colony_steps_each_generation):
                 self.colony_step()
+                print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
+                
             self.genetic_step()
-            
-    def __str__(self):
+          
+    def str_population(self) -> str:
         txt_population = "["
         for ant in self.__population:
             txt_population += "\n"
             txt_population += str(ant)
         txt_population += "]"
-        
+        return txt_population
+      
+    def __str__(self):
+        txt_population = self.str_population()
         return f""" 
             {self.__city_graph}
             \n General params : {self.__general_params} \nGenetic params : {self.__genetic_params} \nColony params : {self.__colony_params}
             \nPopulation : {txt_population}
             \n
             """
-'''
-# TODO (à améliorer mais marche déjà)
-def metric(ant: Ant) -> float:
-    return ant.get_L_path()'''
+
 
 s = Simulation(genetic_params, colony_params, general_params, metric)

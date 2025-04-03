@@ -39,6 +39,15 @@ class Ant:
     
     def get_L_path(self) -> float:
         return self.__L_path
+    
+    def get_q(self) -> float:
+        return self.__q
+    
+    def get_alpha(self) -> float:
+        return self.__alpha
+    
+    def get_beta(self) -> float:
+        return self.__beta
 
     def get_score(self) -> float:
         return self.__score
@@ -77,7 +86,7 @@ class Ant:
         end = self.next_city()
         edge = self.__city_graph.find_edge(start, end)
         
-        if end not in self.__path:
+        if not(end in self.__path):
             self.__num_visited += 1
         self.__path.append(end)
         self.__L_path += edge.get_distance()
@@ -93,7 +102,6 @@ class Ant:
             if self.__num_visited == N_v and self.get_pos() == self.get_pos_init():  # Condition de complétude d'une tournée
                 self.__finished = True
                 break
-        self.__finished = False
             
     def __str__(self):
         txt_path = "["
@@ -101,7 +109,8 @@ class Ant:
             txt_path += str(node.get_id())
             txt_path += ","
         txt_path += "]"
-        return f"q : {self.__q}, alpha : {self.__alpha}, beta : {self.__beta}, path : {txt_path}, score : {self.__score}"
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, path : {txt_path}, score : {self.__score:.3f}"
+         
          
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
@@ -112,4 +121,33 @@ def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
     q = random.random()
     alpha = random.random()
     beta = random.random()
+    return Ant(city_graph, node, q, alpha, beta, metric)
+
+def new_ant_mutation(city_graph: CityGraph, node: Node, metric) -> Ant:
+    return random_ant(city_graph, node, metric)
+
+def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
+    q_best = best_ant.get_q()
+    alpha_best = best_ant.get_alpha()
+    beta_best = best_ant.get_beta()
+    
+    q_new = q_best * (1+0.2*(0.5-random.random()))
+    alpha_new = alpha_best * (1+0.2*(0.5-random.random()))
+    beta_new = beta_best * (1+0.2*(0.5-random.random()))
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
+
+def new_ant_reproduction(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
+    q_best = best_ant.get_q()
+    alpha_best = best_ant.get_alpha()
+    beta_best = best_ant.get_beta()
+    
+    q_new = (q_best + random.random())/2
+    alpha_new = (alpha_best + random.random())/2
+    beta_new = (beta_best + random.random())/2
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
+
+def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:
+    q = ant.get_q()
+    alpha = ant.get_alpha()
+    beta = ant.get_beta()
     return Ant(city_graph, node, q, alpha, beta, metric)

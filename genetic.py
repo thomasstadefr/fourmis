@@ -1,4 +1,4 @@
-from ant import Ant, random_ant
+from ant import Ant, new_ant_mutation, new_ant_crossover, new_ant_reproduction, elite_ant
 from city_graph import CityGraph
 from random import uniform
 
@@ -51,22 +51,48 @@ class Genetic:
         self.__city_graph = city_graph
         self.__population: list[Ant] = population
         self.rank_pop()
-
-    def mutation(self, ant: Ant) -> Ant: 
-        del(ant)
-        new_node = self.__city_graph.random_nodes(1)[0]
-        return random_ant(self.__city_graph, new_node, self.__metric)
-
-    def crossover(self, ant: Ant) -> Ant:
-        # TODO: petite mutation des individus relativement performants autour du meilleur individu 
-        pass
-
-    def reproduction(self, ant: Ant) -> Ant:
-        # TODO: moyenne pondérée entre un individu et le meilleur individu
-        pass
-
+        
     def rank_pop(self) -> None:
         merge_sort_ants(self.__population)
+        
+    def get_best_ant(self):
+        return self.__population[0]
+    
+    def keep_elite(self, ant :Ant):
+        g = self.__city_graph
+        new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
+        
+        same_ant = elite_ant(g, ant, new_node, self.__metric)
+        del(ant)
+        return same_ant
+
+    def mutation(self, ant: Ant) -> Ant: 
+        # On supprime la fourmi de la population avant d'en recréer une nouvelle
+        del(ant)
+        
+        g = self.__city_graph
+        new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
+        return new_ant_mutation(g, new_node, self.__metric)
+
+    def crossover(self, ant: Ant) -> Ant:
+        # On supprime la fourmi de la population avant d'en recréer une nouvelle
+        del(ant)
+        
+        # TODO: petite mutation des individus relativement performants autour du meilleur individu 
+        g = self.__city_graph
+        best_ant = self.get_best_ant()
+        new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
+        return new_ant_crossover(g, best_ant, new_node, self.__metric)
+
+    def reproduction(self, ant: Ant) -> Ant:
+        # On supprime la fourmi de la population avant d'en recréer une nouvelle
+        del(ant)
+        
+        # TODO: moyenne pondérée entre un individu et le meilleur individu
+        g = self.__city_graph
+        best_ant = self.get_best_ant()
+        new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
+        return new_ant_reproduction(g, best_ant, new_node, self.__metric)
         
     def genetic_step(self) -> None:
         pop = self.__population
@@ -76,9 +102,15 @@ class Genetic:
         N_cross = int(self.__cross_rate * self.__N_pop)
         N_repr = int(self.__repr_rate * self.__N_pop)
         N_same = self.__N_pop - N_mut - N_cross - N_repr
+        
+        for i in range(0, N_same):
+            pop[i] = self.keep_elite(pop[i])
+            
         for i in range(N_same, N_same + N_cross):
             pop[i] = self.crossover(pop[i])
+            
         for i in range(N_same + N_cross, N_same + N_cross + N_repr):
             pop[i] = self.reproduction(pop[i])
+            
         for i in range(N_same + N_cross + N_repr, N_same + N_cross + N_repr + N_mut):
             pop[i] = self.mutation(pop[i])
