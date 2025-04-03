@@ -4,9 +4,10 @@ from genetic import Genetic
 from colony import Colony
 from ant import Ant, random_population
 from city_graph import CityGraph, Node
+from config import genetic_params, general_params, colony_params, metric
 
 class Visualisation:
-    def __init__(self, city_graph: CityGraph):
+    def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params):
         self.__root = tk.Tk()
         self.__root.geometry("500x500")
         self.__root.title("TSP simulation by ant colony and genetic algorithm")
@@ -57,71 +58,71 @@ class Visualisation:
         self.__genetic_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__genetic_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__genetic_params: dict[str, float] = {"mut_rate" : 0, "cross_rate" : 0, "repr_rate" : 0}
+        self.__genetic_params: dict[str, float] = genetic_params
         
         self.__mut_rate_label = tk.Label(self.__genetic_params_frame, text="Mutation rate :")
         self.__mut_rate_label.pack()
         self.__mut_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__mut_rate_entry.pack()
-        self.__mut_rate_entry.insert(0, 0.0)
+        self.__mut_rate_entry.insert(0, self.__genetic_params["mut_rate"])
         
         self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text="Crossover rate :")
         self.__cross_rate_label.pack()
         self.__cross_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__cross_rate_entry.pack()
-        self.__cross_rate_entry.insert(0, 0.0)
+        self.__cross_rate_entry.insert(0, self.__genetic_params["cross_rate"])
         
         self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text="Reproduction rate :")
         self.__repr_rate_label.pack()
         self.__repr_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
         self.__repr_rate_entry.pack()
-        self.__repr_rate_entry.insert(0, 0.0)
+        self.__repr_rate_entry.insert(0, self.__genetic_params["repr_rate"])
         
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__colony_params: dict[str, float] = {"Q" : 0.0, "evap_rate" : 0.0, "init_pheromone": 0.0}
+        self.__colony_params: dict[str, float] = colony_params
         
         self.__Q_label = tk.Label(self.__colony_params_frame, text="Q :")
         self.__Q_label.pack()
         self.__Q_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__Q_entry.pack()
-        self.__Q_entry.insert(0, 0.0)
+        self.__Q_entry.insert(0, self.__colony_params["Q"])
         
         self.__evap_rate_label = tk.Label(self.__colony_params_frame, text="Evaporation rate :")
         self.__evap_rate_label.pack()
         self.__evap_rate_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__evap_rate_entry.pack()
-        self.__evap_rate_entry.insert(0, 0.0)
+        self.__evap_rate_entry.insert(0, self.__colony_params["evap_rate"])
 
         self.__init_pheromone_label = tk.Label(self.__colony_params_frame, text="Initial pheromone :")
         self.__init_pheromone_label.pack()
         self.__init_pheromone_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__init_pheromone_entry.pack()
-        self.__init_pheromone_entry.insert(0, 0.0)
+        self.__init_pheromone_entry.insert(0, self.__colony_params["init_pheromone"])
         
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
-        self.__general_params: dict[str, int] = {"N_pop" : 0, "num_genetic_steps" : 0, "num_colony_steps": 0}
+        self.__general_params: dict[str, int] = general_params
         
         self.__N_pop_label = tk.Label(self.__general_params_frame, text="Population size :")
         self.__N_pop_label.pack()
         self.__N_pop_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__N_pop_entry.pack()
-        self.__N_pop_entry.insert(0, 0)
+        self.__N_pop_entry.insert(0, self.__general_params["N_pop"])
         
         self.__num_genetic_steps_label = tk.Label(self.__general_params_frame, text="Number of genetic steps :")
         self.__num_genetic_steps_label.pack()
         self.__num_genetic_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__num_genetic_steps_entry.pack()
-        self.__num_genetic_steps_entry.insert(0, 0)
+        self.__num_genetic_steps_entry.insert(0, self.__general_params["num_genetic_steps"])
 
         self.__num_colony_steps_label = tk.Label(self.__general_params_frame, text="Number of colony steps each generation :")
         self.__num_colony_steps_label.pack()
         self.__num_colony_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__num_colony_steps_entry.pack()
-        self.__num_colony_steps_entry.insert(0, 0)
+        self.__num_colony_steps_entry.insert(0, self.__general_params["num_colony_steps"])
         
         self.__root.mainloop()
         
@@ -453,9 +454,9 @@ class Visualisation:
         return None 
 
 class Simulation(Genetic, Colony, Visualisation):
-    def __init__(self, metric): #: callable[Ant, float]
+    def __init__(self, genetic_params, colony_params, general_params, metric): #: callable[Ant, float]
         self.__city_graph = CityGraph()
-        Visualisation.__init__(self, self.__city_graph)
+        Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params)
         
         self.__steps: int = 0
         while True:
@@ -520,9 +521,9 @@ class Simulation(Genetic, Colony, Visualisation):
             \nPopulation : {txt_population}
             \n
             """
-
+'''
 # TODO (à améliorer mais marche déjà)
 def metric(ant: Ant) -> float:
-    return ant.get_L_path()
+    return ant.get_L_path()'''
 
-s = Simulation(metric)
+s = Simulation(genetic_params, colony_params, general_params, metric)
