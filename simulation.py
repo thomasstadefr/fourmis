@@ -9,12 +9,12 @@ from config import genetic_params, general_params, colony_params, metric
 class Visualisation:
     def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params):
         self.__root = tk.Tk()
-        self.__root.geometry("500x500")
+        self.__root.geometry("700x600")
         self.__root.title("TSP simulation by ant colony and genetic algorithm")
         
         self.__canvas_frame = tk.Frame(self.__root)
         self.__canvas_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        self.__canvas = tk.Canvas(self.__canvas_frame, width=500, height=300)
+        self.__canvas = tk.Canvas(self.__canvas_frame, width=700, height=400)
         self.__canvas.pack(fill=tk.BOTH, expand=True)
         
         self.__drawn_nodes: dict[
