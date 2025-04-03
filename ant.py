@@ -1,4 +1,4 @@
-import random
+from random import uniform, choices
 #from typing import Self
 from city_graph import Edge, Node, CityGraph
 
@@ -66,6 +66,7 @@ class Ant:
         for e in l_edges:
             tau = e.get_pheromone()
             eta = 1 / e.get_distance()
+            # TODO: pondérer par le path
             score: float = tau ** self.__alpha * eta ** self.__beta
             l_scores.append(score)
             if score > max_score:
@@ -76,7 +77,7 @@ class Ant:
     def next_city(self) -> Node:
         l_edges, l_scores, max_edge = self.score_choices()
         if self.__q <= Ant.q0:
-            next_edge = random.choices(l_edges, l_scores)[0]
+            next_edge = choices(l_edges, l_scores)[0]
         else:
             next_edge = max_edge
         return next_edge.get_end()
@@ -86,7 +87,7 @@ class Ant:
         end = self.next_city()
         edge = self.__city_graph.find_edge(start, end)
         
-        if not(end in self.__path):
+        if end not in self.__path:
             self.__num_visited += 1
         self.__path.append(end)
         self.__L_path += edge.get_distance()
@@ -118,32 +119,33 @@ def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     return [random_ant(city_graph, node, metric) for node in ant_nodes]
                 
 def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
-    q = random.random()
-    alpha = random.random()
-    beta = random.random()
+    q = uniform(0, 1)
+    alpha = uniform(0.5, 1.5)
+    beta = uniform(0.5, 1.5)
     return Ant(city_graph, node, q, alpha, beta, metric)
 
 def new_ant_mutation(city_graph: CityGraph, node: Node, metric) -> Ant:
     return random_ant(city_graph, node, metric)
-
-def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
-    q_best = best_ant.get_q()
-    alpha_best = best_ant.get_alpha()
-    beta_best = best_ant.get_beta()
-    
-    q_new = q_best * (1+0.2*(0.5-random.random()))
-    alpha_new = alpha_best * (1+0.2*(0.5-random.random()))
-    beta_new = beta_best * (1+0.2*(0.5-random.random()))
-    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
 
 def new_ant_reproduction(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()
     
-    q_new = (q_best + random.random())/2
-    alpha_new = (alpha_best + random.random())/2
-    beta_new = (beta_best + random.random())/2
+    q_new = q_best * uniform(0.9, 1.1)
+    alpha_new = alpha_best * uniform(0.9, 1.1)
+    beta_new = beta_best * uniform(0.9, 1.1)
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
+
+def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
+    # TODO: faire un VRAI crossover, en faisant la moyenne avec une VRAIE ant
+    q_best = best_ant.get_q()
+    alpha_best = best_ant.get_alpha()
+    beta_best = best_ant.get_beta()
+    
+    q_new = (q_best + uniform(0, 1))/2
+    alpha_new = (alpha_best + uniform(0.5, 1.5))/2
+    beta_new = (beta_best + uniform(0.5, 1.5))/2
     return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
 
 def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:

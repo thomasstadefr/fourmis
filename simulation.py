@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import font
 from genetic import Genetic
 from colony import Colony
-from ant import Ant, random_population
+from ant import random_population
 from city_graph import CityGraph, Node
 from config import genetic_params, general_params, colony_params, metric
 
@@ -506,6 +506,8 @@ class Simulation(Genetic, Colony, Visualisation):
         for i in range(N_genetic_steps):
             for j in range(N_colony_steps_each_generation):
                 self.colony_step()
+                # TODO: màj le graphe à chaque étape
+                # épaissir les arêtes selon la qté de phéromones...
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 
             self.genetic_step()
