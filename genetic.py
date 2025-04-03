@@ -1,4 +1,4 @@
-from ant import Ant, new_ant_mutation, new_ant_reproduction, new_ant_crossover, elite_ant
+from ant import Ant, new_random_ant, new_ant_clonage_mutation, new_ant_crossover, elite_ant
 from city_graph import CityGraph
 
 def exchange_ants(pop: list[Ant], i: int, j: int) -> None:
@@ -37,14 +37,14 @@ class Genetic:
         city_graph : CityGraph,
         population: list[Ant],
         N_pop: int,
-        mut_rate: float,
-        cross_rate: float,
+        rand_rate: float,
+        mutation_rate: float,
         repr_rate: float,
         metric #: callable[Ant, float]
     ):
-        self.__mut_rate: float = mut_rate
-        self.__cross_rate: float = cross_rate
-        self.__repr_rate: float = repr_rate
+        self.__rand_rate: float = rand_rate
+        self.__mutation_rate: float = mutation_rate
+        self.__crossover_rate: float = repr_rate
         self.__metric = metric #: callable[Ant, float]
         self.__N_pop: int = N_pop
         self.__city_graph = city_graph
@@ -65,15 +65,15 @@ class Genetic:
         del(ant)
         return same_ant
 
-    def mutation(self, ant: Ant) -> Ant: 
+    def randomization(self, ant: Ant) -> Ant: 
         # On supprime la fourmi de la population avant d'en recréer une nouvelle
         del(ant)
         
         g = self.__city_graph
         new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
-        return new_ant_mutation(g, new_node, self.__metric)
+        return new_random_ant(g, new_node, self.__metric)
 
-    def crossover(self, ant: Ant) -> Ant:
+    def clonage_mutation(self, ant: Ant) -> Ant:
         # On supprime la fourmi de la population avant d'en recréer une nouvelle
         del(ant)
         
@@ -81,9 +81,9 @@ class Genetic:
         g = self.__city_graph
         best_ant = self.get_best_ant()
         new_node = g.random_nodes(1)[0] # faut-il mettre les fourmis sur le même noeud ou en changer ???
-        return new_ant_reproduction(g, best_ant, new_node, self.__metric)
+        return new_ant_clonage_mutation(g, best_ant, new_node, self.__metric)
 
-    def reproduction(self, ant: Ant) -> Ant:
+    def crossover(self, ant: Ant) -> Ant:
         # On supprime la fourmi de la population avant d'en recréer une nouvelle
         del(ant)
         
@@ -97,19 +97,19 @@ class Genetic:
         pop = self.__population
         self.rank_pop()
 
-        N_mut = int(self.__mut_rate * self.__N_pop)
-        N_cross = int(self.__cross_rate * self.__N_pop)
-        N_repr = int(self.__repr_rate * self.__N_pop)
-        N_same = self.__N_pop - N_mut - N_cross - N_repr
+        N_rand = int(self.__rand_rate * self.__N_pop)
+        N_mutation = int(self.__mutation_rate * self.__N_pop)
+        N_crossover = int(self.__crossover_rate * self.__N_pop)
+        N_same = self.__N_pop - N_rand - N_mutation - N_crossover
         
         for i in range(0, N_same):
             pop[i] = self.keep_elite(pop[i])
             
-        for i in range(N_same, N_same + N_cross):
+        for i in range(N_same, N_same + N_mutation):
+            pop[i] = self.clonage_mutation(pop[i])
+            
+        for i in range(N_same + N_mutation, N_same + N_mutation + N_crossover):
             pop[i] = self.crossover(pop[i])
             
-        for i in range(N_same + N_cross, N_same + N_cross + N_repr):
-            pop[i] = self.reproduction(pop[i])
-            
-        for i in range(N_same + N_cross + N_repr, N_same + N_cross + N_repr + N_mut):
-            pop[i] = self.mutation(pop[i])
+        for i in range(N_same + N_mutation + N_crossover, N_same + N_mutation + N_crossover + N_rand):
+            pop[i] = self.randomization(pop[i])

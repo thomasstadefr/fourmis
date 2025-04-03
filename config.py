@@ -1,9 +1,9 @@
 from ant import Ant
 
 genetic_params: dict[str, float] = {
-    "mut_rate" : 0.2, 
-    "cross_rate" : 0.2, 
-    "repr_rate" : 0.3
+    "rand_rate" : 0.2, 
+    "mutation_rate" : 0.2, 
+    "crossover_rate" : 0.3
 }
 
 colony_params: dict[str, float] = {

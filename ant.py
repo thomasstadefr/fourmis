@@ -116,18 +116,15 @@ class Ant:
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     ant_nodes = city_graph.random_nodes(N_pop)
-    return [random_ant(city_graph, node, metric) for node in ant_nodes]
+    return [new_random_ant(city_graph, node, metric) for node in ant_nodes]
                 
-def random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
+def new_random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
     q = uniform(0, 1)
     alpha = uniform(0.5, 1.5)
     beta = uniform(0.5, 1.5)
     return Ant(city_graph, node, q, alpha, beta, metric)
 
-def new_ant_mutation(city_graph: CityGraph, node: Node, metric) -> Ant:
-    return random_ant(city_graph, node, metric)
-
-def new_ant_reproduction(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
+def new_ant_clonage_mutation(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()

@@ -60,23 +60,23 @@ class Visualisation:
         
         self.__genetic_params: dict[str, float] = genetic_params
         
-        self.__mut_rate_label = tk.Label(self.__genetic_params_frame, text="Mutation rate :")
-        self.__mut_rate_label.pack()
-        self.__mut_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
-        self.__mut_rate_entry.pack()
-        self.__mut_rate_entry.insert(0, self.__genetic_params["mut_rate"])
+        self.__rand_rate_label = tk.Label(self.__genetic_params_frame, text="Randomization rate :")
+        self.__rand_rate_label.pack()
+        self.__rand_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
+        self.__rand_rate_entry.pack()
+        self.__rand_rate_entry.insert(0, self.__genetic_params["rand_rate"])
         
-        self.__cross_rate_label = tk.Label(self.__genetic_params_frame, text="Crossover rate :")
-        self.__cross_rate_label.pack()
-        self.__cross_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
-        self.__cross_rate_entry.pack()
-        self.__cross_rate_entry.insert(0, self.__genetic_params["cross_rate"])
+        self.__mutation_rate_label = tk.Label(self.__genetic_params_frame, text="Mutation rate :")
+        self.__mutation_rate_label.pack()
+        self.__mutation_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
+        self.__mutation_rate_entry.pack()
+        self.__mutation_rate_entry.insert(0, self.__genetic_params["mutation_rate"])
         
-        self.__repr_rate_label = tk.Label(self.__genetic_params_frame, text="Reproduction rate :")
-        self.__repr_rate_label.pack()
-        self.__repr_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
-        self.__repr_rate_entry.pack()
-        self.__repr_rate_entry.insert(0, self.__genetic_params["repr_rate"])
+        self.__crossover_rate_label = tk.Label(self.__genetic_params_frame, text="Crossover rate :")
+        self.__crossover_rate_label.pack()
+        self.__crossover_rate_entry = tk.Entry(self.__genetic_params_frame, justify="center")
+        self.__crossover_rate_entry.pack()
+        self.__crossover_rate_entry.insert(0, self.__genetic_params["crossover_rate"])
         
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
@@ -138,13 +138,13 @@ class Visualisation:
         
     def check_entries(self) -> bool:
         try:
-            mut_rate = float(self.__mut_rate_entry.get())
-            cross_rate = float(self.__cross_rate_entry.get())
-            repr_rate = float(self.__repr_rate_entry.get())
-            if mut_rate + cross_rate + repr_rate > 1:
+            rand_rate = float(self.__rand_rate_entry.get())
+            mutation_rate = float(self.__mutation_rate_entry.get())
+            crossover_rate = float(self.__crossover_rate_entry.get())
+            if rand_rate + mutation_rate + crossover_rate > 1:
                 self.raise_error_value("mutation_rate + reproduction_rate + crossover_rate <= 1")
                 return False
-            if mut_rate<0 or repr_rate<0 or cross_rate<0:
+            if rand_rate < 0 or crossover_rate < 0 or mutation_rate < 0:
                 self.raise_error_value("Values must be positives")
                 return False
             
@@ -188,18 +188,18 @@ class Visualisation:
             self.__begin_button.config(state=tk.DISABLED)
             
             genetic_params = self.__genetic_params
-            genetic_params["mut_rate"] = float(self.__mut_rate_entry.get())
-            self.__mut_rate_entry.delete(0, tk.END)
-            self.__mut_rate_entry.insert(0, genetic_params["mut_rate"])
-            self.__mut_rate_entry.config(state="readonly")
-            genetic_params["cross_rate"] = float(self.__cross_rate_entry.get())
-            self.__cross_rate_entry.delete(0, tk.END)
-            self.__cross_rate_entry.insert(0, genetic_params["cross_rate"])
-            self.__cross_rate_entry.config(state="readonly")
-            genetic_params["repr_rate"] = float(self.__repr_rate_entry.get())
-            self.__repr_rate_entry.delete(0, tk.END)
-            self.__repr_rate_entry.insert(0, genetic_params["repr_rate"])
-            self.__repr_rate_entry.config(state="readonly")
+            genetic_params["rand_rate"] = float(self.__rand_rate_entry.get())
+            self.__rand_rate_entry.delete(0, tk.END)
+            self.__rand_rate_entry.insert(0, genetic_params["rand_rate"])
+            self.__rand_rate_entry.config(state="readonly")
+            genetic_params["mutation_rate"] = float(self.__mutation_rate_entry.get())
+            self.__mutation_rate_entry.delete(0, tk.END)
+            self.__mutation_rate_entry.insert(0, genetic_params["mutation_rate"])
+            self.__mutation_rate_entry.config(state="readonly")
+            genetic_params["crossover_rate"] = float(self.__crossover_rate_entry.get())
+            self.__crossover_rate_entry.delete(0, tk.END)
+            self.__crossover_rate_entry.insert(0, genetic_params["crossover_rate"])
+            self.__crossover_rate_entry.config(state="readonly")
             
             colony_params = self.__colony_params
             colony_params["Q"] = float(self.__Q_entry.get())
@@ -478,9 +478,9 @@ class Simulation(Genetic, Colony, Visualisation):
             self.__city_graph,
             self.__population,
             self.__general_params["N_pop"],
-            self.__genetic_params["mut_rate"],
-            self.__genetic_params["cross_rate"],
-            self.__genetic_params["repr_rate"],
+            self.__genetic_params["rand_rate"],
+            self.__genetic_params["mutation_rate"],
+            self.__genetic_params["crossover_rate"],
             metric
         )
         Colony.__init__(

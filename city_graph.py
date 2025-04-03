@@ -142,10 +142,6 @@ class CityGraph:
     def evaporate(self, evap_rate: float) -> None:
         for e in self.__edges:
             e.evaporate(evap_rate)
-    
-    def kosaraju(self) -> bool:
-        # TODO: prend le graphe et retourne si oui ou non il est fortement connexe
-        pass
         
     def str_edges(self) -> str:
         txt_edges = "Edges : "
