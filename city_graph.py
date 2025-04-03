@@ -147,13 +147,19 @@ class CityGraph:
         # TODO: prend le graphe et retourne si oui ou non il est fortement connexe
         pass
         
-    def __str__(self) -> str:
-        txt_nodes: str = "Nodes : "
-        for n in self.__nodes:
-            txt_nodes += str(n) 
-            txt_nodes += " | "
+    def str_edges(self) -> str:
         txt_edges = "Edges : "
         for e in self.__edges:
             txt_edges += str(e)
             txt_edges += " | "
-        return "\n" + txt_nodes + "\n" + txt_edges + "\n"
+        return txt_edges
+    
+    def str_nodes(self):
+        txt_nodes: str = "Nodes : "
+        for n in self.__nodes:
+            txt_nodes += str(n) 
+            txt_nodes += " | "
+        return txt_nodes
+        
+    def __str__(self) -> str:
+        return "\n" + self.str_nodes() + "\n" + self.str_edges() + "\n"

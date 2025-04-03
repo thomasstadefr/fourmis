@@ -496,6 +496,7 @@ class Simulation(Genetic, Colony, Visualisation):
             
         print(self)
         self.launch()
+        print(f"Edges after the simulation : {self.__city_graph.str_edges()}\n")
 
     def launch(self) -> None:
         # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
@@ -521,7 +522,7 @@ class Simulation(Genetic, Colony, Visualisation):
         txt_population = self.str_population()
         return f""" 
             {self.__city_graph}
-            \n General params : {self.__general_params} \nGenetic params : {self.__genetic_params} \nColony params : {self.__colony_params}
+            \nGeneral params : {self.__general_params} \nGenetic params : {self.__genetic_params} \nColony params : {self.__colony_params}
             \nPopulation : {txt_population}
             \n
             """
