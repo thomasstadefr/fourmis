@@ -7,7 +7,7 @@ genetic_params: dict[str, float] = {
 }
 
 colony_params: dict[str, float] = {
-    "Q" : 1.0, 
+    "Q" : 50.0, 
     "evap_rate" : 0.2, 
     "init_pheromone": 1.0
 }

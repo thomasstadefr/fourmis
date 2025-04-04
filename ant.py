@@ -93,6 +93,12 @@ class Ant:
         self.__L_path += edge.get_distance()
         self.update_score()
         
+    def reset_trip(self):
+        self.__path = [self.get_pos_init()]
+        self.__L_path = 0
+        self.__num_visited = 1
+        self.__finished = False
+        
     def trip(self) -> bool:
         # Renvoie si la fourmi a réussi
         # Autant de pas à faire que nombre de villes : une étape corrspond à un trajet complet 

@@ -36,9 +36,9 @@ class Colony:
                     e = self.__city_graph.find_edge(start, end)
                     e.set_pheromone(e.get_pheromone() + delta)
 
-
     def colony_step(self) -> None:
         for ant in self.__population:
+            ant.reset_trip()
             ant.trip()
         self.evaporation()
         self.created_pheromone()
