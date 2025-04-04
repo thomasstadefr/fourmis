@@ -531,7 +531,12 @@ class Simulation(Genetic, Colony, Visualisation):
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 sleep(.2)
-            self.genetic_step()
+                
+            if not(i == N_genetic_steps-1): # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
+                self.genetic_step()
+            
+        self.rank_pop()
+        print("Meilleur individu : ", str(self.get_best_ant()), "\n")
           
     def str_population(self) -> str:
         txt_population = "["
