@@ -1,13 +1,15 @@
+from time import sleep
 import tkinter as tk
 from tkinter import font
 from genetic import Genetic
 from colony import Colony
 from ant import random_population
-from city_graph import CityGraph, Node
+from city_graph import CityGraph, Node, Edge
 from config import genetic_params, general_params, colony_params, metric
 
 class Visualisation:
-    def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params):
+    def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, initialize):
+        self.__init = initialize
         self.__root = tk.Tk()
         self.__root.geometry("700x600")
         self.__root.title("TSP simulation by ant colony and genetic algorithm")
@@ -123,7 +125,6 @@ class Visualisation:
         self.__num_colony_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__num_colony_steps_entry.pack()
         self.__num_colony_steps_entry.insert(0, self.__general_params["num_colony_steps"])
-        
         self.__root.mainloop()
         
     def raise_error_value(self, error_msg: str) -> None:
@@ -228,6 +229,7 @@ class Visualisation:
             self.__num_colony_steps_entry.delete(0, tk.END)
             self.__num_colony_steps_entry.insert(0, general_params["num_colony_steps"])
             self.__num_colony_steps_entry.config(state="readonly")
+            self.__init()
         
     def get_begin(self) -> bool:
         return self.__begin
@@ -451,18 +453,33 @@ class Visualisation:
             yi = n.get_y()
             if (xi - x) ** 2 + (yi - y) ** 2 < r ** 2:
                 return n
-        return None 
+        return None
+    
+    def update_width_edge(self, e: Edge) -> None:
+        width = e.get_pheromone()
+        start = e.get_start()
+        end = e.get_end()
+        x1 = start.get_x()
+        y1 = start.get_y()
+        x2 = end.get_x()
+        y2 = end.get_y()
+        shape = self.__drawn_edges[(x1, y1, x2, y2)]
+        self.__canvas.itemconfig(shape, width=width)
+
+    def update_width_all_edges(self) -> None:
+        for e in self.__city_graph.get_edges():
+            self.update_width_edge(e)
+    
+    def get_root(self):
+        return self.__root
 
 class Simulation(Genetic, Colony, Visualisation):
     def __init__(self, genetic_params, colony_params, general_params, metric): #: callable[Ant, float]
         self.__city_graph = CityGraph()
-        Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params)
-        
         self.__steps: int = 0
-        while True:
-            if self.get_begin():
-                break
-            
+        Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params, self.initialize)
+
+    def initialize(self) -> None:
         self.__genetic_params = self.get_genetic_params()
         self.__colony_params = self.get_colony_params()
         self.__general_params = self.get_general_params()
@@ -503,13 +520,16 @@ class Simulation(Genetic, Colony, Visualisation):
         N_genetic_steps = self.__N_genetic_steps
         N_colony_steps_each_generation = self.__N_colony_steps_each_generation
         
+        self.update_width_all_edges()
         for i in range(N_genetic_steps):
+            print(f"\nEtape génétique {i}")
             for j in range(N_colony_steps_each_generation):
+                print(f"Etape colonie {j}")
                 self.colony_step()
-                # TODO: màj le graphe à chaque étape
-                # épaissir les arêtes selon la qté de phéromones...
+                self.update_width_all_edges()
+                self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
-                
+                sleep(.5)
             self.genetic_step()
           
     def str_population(self) -> str:
