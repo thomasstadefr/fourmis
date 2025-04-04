@@ -54,7 +54,7 @@ class Visualisation:
         self.__delete_node_mode_button = tk.Button(self.__settings_frame, text = 'Delete node mode', command = self.set_mode_delete_node, bg="grey")
         self.__delete_node_mode_button.pack()
         
-        self.__step_label = tk.Label(self.__settings_frame, text="Etape : -")
+        self.__step_label = tk.Label(self.__settings_frame, text="Génération : -")
         self.__step_label.pack()
         
         self.__genetic_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
@@ -243,8 +243,8 @@ class Visualisation:
     def get_general_params(self) -> dict[str, int]:
         return self.__general_params
     
-    def update_step(self, i: int) -> None:
-        self.__step_label.config(text=f"Etape : {i}")
+    def update_generation_label(self, i: int) -> None:
+        self.__step_label.config(text=f"Génération : {i}")
         
     def set_mode_create(self) -> None:
         self.__mode = "create"
@@ -523,13 +523,14 @@ class Simulation(Genetic, Colony, Visualisation):
         self.update_width_all_edges()
         for i in range(N_genetic_steps):
             print(f"\nEtape génétique {i}")
+            self.update_generation_label(i)
             for j in range(N_colony_steps_each_generation):
                 print(f"Etape colonie {j}")
                 self.colony_step()
                 self.update_width_all_edges()
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
-                sleep(.5)
+                sleep(.2)
             self.genetic_step()
           
     def str_population(self) -> str:
