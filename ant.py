@@ -12,11 +12,13 @@ class Ant:
         q: float,
         alpha: float,
         beta: float,
+        gamma: float, # pour pondérer les choix de prochaine ville par la mémoire
         metric #: callable[Self, float]
     ):
         self.__q = q 
         self.__alpha = alpha
         self.__beta = beta
+        self.__gamma = gamma
         self.__city_graph = city_graph
         self.__path_nodes: list[Node] = [pos_init]
         self.__path_edges: list[Edge] = []
@@ -52,6 +54,9 @@ class Ant:
     
     def get_beta(self) -> float:
         return self.__beta
+    
+    def get_gamma(self) -> float:
+        return self.__gamma
 
     def get_score(self) -> float:
         return self.__score
@@ -70,8 +75,13 @@ class Ant:
         for e in l_edges:
             tau = e.get_pheromone()
             eta = 1 / e.get_distance()
-            # TODO: pondérer par le path
+            end = e.get_end()
             score: float = tau ** self.__alpha * eta ** self.__beta
+            try:
+                last_time = self.__path_nodes[::-1].index(end) # nombre d'étapes deppuis la dernière visite
+            except ValueError: # noeud end jamais visité
+                last_time = float("inf")        
+            score *= 1 - (1 - self.__gamma) ** last_time # pondération par un premier ordre
             l_scores.append(score)
             if score > max_score:
                 max_score = score
@@ -122,7 +132,7 @@ class Ant:
             txt_path += str(node.get_id())
             txt_path += ","
         txt_path += "]"
-        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, path : {txt_path}, score : {self.__score:.3f}"
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, path : {txt_path}, score : {self.__score:.3f}"
          
          
          
@@ -134,33 +144,41 @@ def new_random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
     q = uniform(0, 1)
     alpha = uniform(0.5, 1.5)
     beta = uniform(0.5, 1.5)
-    return Ant(city_graph, node, q, alpha, beta, metric)
+    gamma = uniform(0, 0.5)
+    return Ant(city_graph, node, q, alpha, beta, gamma, metric)
 
 def new_ant_clonage_mutation(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()
+    gamma_best = best_ant.get_gamma()
     
     q_new = q_best * uniform(0.9, 1.1)
     if q_new > 1:
         q_new = 1
     alpha_new = alpha_best * uniform(0.9, 1.1)
     beta_new = beta_best * uniform(0.9, 1.1)
-    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
+    gamma_new = gamma_best * uniform(0.9, 1.1)
+    if gamma_new > 1:
+        gamma_new = 1
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, gamma_new, metric)
 
 def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     # TODO: faire un VRAI crossover, en faisant la moyenne avec une VRAIE ant
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()
+    gamma_best = best_ant.get_gamma()
     
     q_new = (q_best + uniform(0, 1))/2
     alpha_new = (alpha_best + uniform(0.5, 1.5))/2
     beta_new = (beta_best + uniform(0.5, 1.5))/2
-    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
+    gamma_new = (gamma_best + uniform(0, 0.5))/2
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, gamma_new, metric)
 
 def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:
     q = ant.get_q()
     alpha = ant.get_alpha()
     beta = ant.get_beta()
-    return Ant(city_graph, node, q, alpha, beta, metric)
+    gamma = ant.get_gamma()
+    return Ant(city_graph, node, q, alpha, beta, gamma, metric)
