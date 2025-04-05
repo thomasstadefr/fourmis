@@ -19,7 +19,7 @@ for _ in range(100):
 
 def metric(ant: Ant) -> float:
     length = ant.get_L_path
-    number_of_cities = len(ant.get_path)
+    number_of_cities = len(ant.get_path_nodes())
     return length / (number_of_cities ** 1.5)
 
 colony = Colony(

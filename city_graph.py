@@ -62,6 +62,9 @@ class Edge:
     
     def evaporate(self, evap_rate: float) -> None:
         self.__pheromone *= 1 - evap_rate
+    
+    def increase(self, deposited_pheromone: float) -> None:
+        self.__pheromone += deposited_pheromone
         
     def __eq__(self, edge: Self) -> bool:
         return self.__start == edge.get_start() and self.__end == edge.get_end()
@@ -105,7 +108,7 @@ class CityGraph:
         del(n)
         self.__N_v -= 1
         
-    def random_nodes(self, k_nodes):
+    def random_nodes(self, k_nodes) -> list[Node]:
         return random.choices(self.__nodes, k=k_nodes)
     
     def find_edge(self, start: Node, end: Node) -> Edge | None:

@@ -27,14 +27,10 @@ class Colony:
     def created_pheromone(self) -> None:                
         for ant in self.__population:
             if ant.is_finished():
-                path = ant.get_path()
+                path_edges = ant.get_path_edges()
                 delta = self.__Q / ant.get_L_path()
-                
-                for i in range(len(path) - 1):                    
-                    start = path[i]
-                    end = path[i + 1]
-                    e = self.__city_graph.find_edge(start, end)
-                    e.set_pheromone(e.get_pheromone() + delta)
+                for e in path_edges:
+                    e.increase(delta)
 
     def colony_step(self) -> None:
         for ant in self.__population:

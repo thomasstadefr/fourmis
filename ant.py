@@ -18,7 +18,8 @@ class Ant:
         self.__alpha = alpha
         self.__beta = beta
         self.__city_graph = city_graph
-        self.__path: list[Node] = [pos_init]
+        self.__path_nodes: list[Node] = [pos_init]
+        self.__path_edges: list[Edge] = []
         self.__num_visited: int = 1
         self.__L_path: float = 0
         self.__metric = metric #: callable[Self, float]
@@ -29,13 +30,16 @@ class Ant:
         return self.__finished
 
     def get_pos(self) -> Node:
-        return self.__path[-1]
+        return self.__path_nodes[-1]
     
     def get_pos_init(self) -> Node:
-        return self.__path[0]
+        return self.__path_nodes[0]
     
-    def get_path(self) -> list[Node]:
-        return self.__path
+    def get_path_nodes(self) -> list[Node]:
+        return self.__path_nodes
+    
+    def get_path_edges(self) -> list[Edge]:
+        return self.__path_edges
     
     def get_L_path(self) -> float:
         return self.__L_path
@@ -87,14 +91,16 @@ class Ant:
         end = self.next_city()
         edge = self.__city_graph.find_edge(start, end)
         
-        if end not in self.__path:
+        if end not in self.__path_nodes:
             self.__num_visited += 1
-        self.__path.append(end)
+        self.__path_nodes.append(end)
+        self.__path_edges.append(edge)
         self.__L_path += edge.get_distance()
         self.update_score()
         
     def reset_trip(self):
-        self.__path = [self.get_pos_init()]
+        self.__path_nodes = [self.get_pos_init()]
+        self.__path_edges = []
         self.__L_path = 0
         self.__num_visited = 1
         self.__finished = False
@@ -112,7 +118,7 @@ class Ant:
             
     def __str__(self):
         txt_path = "["
-        for node in self.__path:
+        for node in self.__path_nodes:
             txt_path += str(node.get_id())
             txt_path += ","
         txt_path += "]"
@@ -136,6 +142,8 @@ def new_ant_clonage_mutation(city_graph: CityGraph, best_ant: Ant, node: Node, m
     beta_best = best_ant.get_beta()
     
     q_new = q_best * uniform(0.9, 1.1)
+    if q_new > 1:
+        q_new = 1
     alpha_new = alpha_best * uniform(0.9, 1.1)
     beta_new = beta_best * uniform(0.9, 1.1)
     return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)

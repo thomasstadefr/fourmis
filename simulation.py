@@ -459,16 +459,24 @@ class Visualisation:
         width = e.get_pheromone()
         start = e.get_start()
         end = e.get_end()
-        x1 = start.get_x()
-        y1 = start.get_y()
-        x2 = end.get_x()
-        y2 = end.get_y()
-        shape = self.__drawn_edges[(x1, y1, x2, y2)]
-        self.__canvas.itemconfig(shape, width=width)
+        shape = self.__drawn_edges[(start.get_x(), start.get_y(), end.get_x(), end.get_y())]
+        self.__canvas.itemconfig(shape, fill="orange", width=width)
 
     def update_width_all_edges(self) -> None:
         for e in self.__city_graph.get_edges():
             self.update_width_edge(e)
+    
+
+    def update_color_edge(self, e: Edge) -> None:
+        start = e.get_start()
+        end = e.get_end()
+        shape = self.__drawn_edges[(start.get_x(), start.get_y(), end.get_x(), end.get_y())]
+        self.__canvas.itemconfig(shape, fill="red")
+
+    def update_color_best_path(self, best_path_edges: list[Edge]) -> None:
+        for e in best_path_edges:
+            self.update_color_edge(e)
+
     
     def get_root(self):
         return self.__root
@@ -489,7 +497,7 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__N_colony_steps_each_generation = self.__general_params["num_colony_steps"]
         self.__metric = metric
         self.__population = random_population(self.__city_graph, self.__N_pop, self.__metric)
-            
+
         Genetic.__init__(
             self,
             self.__city_graph,
@@ -527,12 +535,14 @@ class Simulation(Genetic, Colony, Visualisation):
             for j in range(N_colony_steps_each_generation):
                 print(f"Etape colonie {j}")
                 self.colony_step()
-                self.update_width_all_edges()
+                self.update_width_all_edges() # épaisseur mise à jour, et tout remis en orange
+                best_path_edges = self.get_best_ant().get_path_edges()
+                self.update_color_best_path(best_path_edges) # mise en rouge du best path
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 sleep(.2)
                 
-            if not(i == N_genetic_steps-1): # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
+            if i != N_genetic_steps - 1: # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
                 self.genetic_step()
             
         self.rank_pop()
