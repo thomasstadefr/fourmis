@@ -460,7 +460,9 @@ class Visualisation:
         start = e.get_start()
         end = e.get_end()
         shape = self.__drawn_edges[(start.get_x(), start.get_y(), end.get_x(), end.get_y())]
-        self.__canvas.itemconfig(shape, fill="orange", width=width)
+        self.__canvas.itemconfig(shape, fill="orange", width=width, dash=())
+        if width < 1:
+            self.__canvas.itemconfig(shape, dash=(10, 10))
 
     def update_width_all_edges(self) -> None:
         for e in self.__city_graph.get_edges():
@@ -541,6 +543,7 @@ class Simulation(Genetic, Colony, Visualisation):
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 sleep(.2)
+            sleep(1) # Pour observer
                 
             if i != N_genetic_steps - 1: # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
                 self.genetic_step()
