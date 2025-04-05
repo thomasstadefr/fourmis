@@ -132,7 +132,7 @@ class Ant:
             txt_path += str(node.get_id())
             txt_path += ","
         txt_path += "]"
-        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, path : {txt_path}, score : {self.__score:.3f}"
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, path : {txt_path}, score : {self.__score:.3f}, finished : {self.__finished}"
          
          
          
@@ -182,3 +182,16 @@ def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:
     beta = ant.get_beta()
     gamma = ant.get_gamma()
     return Ant(city_graph, node, q, alpha, beta, gamma, metric)
+
+def compare_ants(ant1: Ant, ant2: Ant) -> bool:   # relation d'ordre entre les fourmis --> renvoie True ssi ant1 <= ant2
+    ant1_score = ant1.get_score()
+    ant2_score = ant2.get_score()
+    ant1_complete = ant1.is_finished()
+    ant2_complete = ant2.is_finished()
+    
+    if ant1_complete:
+        if not(ant2_complete) or ant1_score < ant2_score:
+            return True
+    if not(ant2_complete) and ant1_score < ant2_score:
+        return True
+    return False

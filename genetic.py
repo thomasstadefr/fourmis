@@ -1,26 +1,25 @@
-from ant import Ant, new_random_ant, new_ant_clonage_mutation, new_ant_crossover, elite_ant
+from ant import Ant, compare_ants, new_random_ant, new_ant_clonage_mutation, new_ant_crossover, elite_ant
 from city_graph import CityGraph
-
-def exchange_ants(pop: list[Ant], i: int, j: int) -> None:
-    tmp = pop[i]
-    pop[i] = pop[j]
-    pop[j] = tmp
 
 def merge_sort_ants(pop: list[Ant]) -> None:
     def merge(i: int, m: int, j: int) -> None:
-        t, s = i, i
+        t = i
         r = m
+        s = i
+        new_tab = []
+        
         while s < j:
-            if r == j or (
-                t < m and
-                pop[t].get_score() < pop[r].get_score()
-            ):
-                exchange_ants(pop, t, s)
+            if r == j or (t < m and compare_ants(pop[t], pop[r])):
+                new_tab.append(pop[t])
                 t += 1
             else:
-                exchange_ants(pop, r, s)
+                new_tab.append(pop[r])
                 r += 1
             s += 1
+            
+        for k in range(i, j):
+            pop[k] = new_tab[k-i]
+        del(new_tab)
         
     def aux(i: int, j: int) -> None:
         if j - i > 1:

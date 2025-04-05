@@ -542,8 +542,8 @@ class Simulation(Genetic, Colony, Visualisation):
                 self.update_color_best_path(best_path_edges) # mise en rouge du best path
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
-                sleep(.2)
-            sleep(1) # Pour observer
+                sleep(.1)
+            sleep(0.5) # Pour observer
                 
             if i != N_genetic_steps - 1: # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
                 self.genetic_step()
@@ -552,6 +552,7 @@ class Simulation(Genetic, Colony, Visualisation):
         print("Meilleur individu : ", str(self.get_best_ant()), "\n")
           
     def str_population(self) -> str:
+        self.rank_pop()
         txt_population = "["
         for ant in self.__population:
             txt_population += "\n"
