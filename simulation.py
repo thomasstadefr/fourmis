@@ -5,7 +5,6 @@ from genetic import Genetic
 from colony import Colony
 from ant import random_population
 from city_graph import CityGraph, Node, Edge, str_path
-from config import genetic_params, general_params, colony_params, metric
 
 class Visualisation:
     def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, initialize):
@@ -616,6 +615,3 @@ class Simulation(Genetic, Colony, Visualisation):
             \nPopulation : {txt_population}
             \n
             """
-
-
-s = Simulation(genetic_params, colony_params, general_params, metric)

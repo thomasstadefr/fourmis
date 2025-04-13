@@ -1,6 +1,13 @@
-Yo
+# Algorithmes Collaboratifs
 
-## UML
+## Problèmes résolus
 
-* Site où mettre le contenu du txt pour générer l'UML https://www.plantuml.com/plantuml/uml
-    * Doc : https://plantuml.com/fr/class-diagram
+* TSP (voyageur de commerce)
+* Coloration de graphes
+
+## Lancer le projet
+
+Lancer le fichier `__init__.py` :
+```sh
+python -m __init__.py
+```
