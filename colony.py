@@ -11,7 +11,7 @@ class Colony:
         evap_rate: float,
         Q: float,
         init_pheromone: float,
-        metric #: callable[Ant, float]
+        metric
     ):
         self.__city_graph: CityGraph = city_graph
         for edge in city_graph.get_edges():

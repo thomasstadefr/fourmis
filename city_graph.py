@@ -162,3 +162,13 @@ class CityGraph:
         
     def __str__(self) -> str:
         return "\n" + self.str_nodes() + "\n" + self.str_edges() + "\n"
+
+
+
+def str_path(path : list[Node]) -> str:
+    txt_path = "["
+    for node in path:
+        txt_path += str(node.get_id())
+        txt_path += ","
+    txt_path += "]"
+    return txt_path

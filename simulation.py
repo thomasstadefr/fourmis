@@ -4,14 +4,14 @@ from tkinter import font
 from genetic import Genetic
 from colony import Colony
 from ant import random_population
-from city_graph import CityGraph, Node, Edge
+from city_graph import CityGraph, Node, Edge, str_path
 from config import genetic_params, general_params, colony_params, metric
 
 class Visualisation:
     def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, initialize):
         self.__init = initialize
         self.__root = tk.Tk()
-        self.__root.geometry("700x600")
+        self.__root.geometry("700x700")
         self.__root.title("TSP simulation by ant colony and genetic algorithm")
         
         self.__canvas_frame = tk.Frame(self.__root)
@@ -44,6 +44,9 @@ class Visualisation:
         self.__settings_frame = tk.Frame(self.__bottom_frame, bg="brown")
         self.__settings_frame.pack(side=tk.LEFT, fill=tk.X)
         
+        
+        # Création du graphe dans l'interface
+        
         self.__begin_button = tk.Button(self.__settings_frame, text = 'Begin', command = self.begin)
         self.__begin_button.pack()
         
@@ -54,8 +57,8 @@ class Visualisation:
         self.__delete_node_mode_button = tk.Button(self.__settings_frame, text = 'Delete node mode', command = self.set_mode_delete_node, bg="grey")
         self.__delete_node_mode_button.pack()
         
-        self.__step_label = tk.Label(self.__settings_frame, text="Génération : -")
-        self.__step_label.pack()
+        
+        # Gestion des genetic_params : rand_rate, mutation_rate, crossover_rate
         
         self.__genetic_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__genetic_params_frame.pack(side=tk.RIGHT, fill=tk.X)
@@ -80,6 +83,9 @@ class Visualisation:
         self.__crossover_rate_entry.pack()
         self.__crossover_rate_entry.insert(0, self.__genetic_params["crossover_rate"])
         
+        
+        # Gestion des colony_params : Q, evap_rate, init_pheromone
+        
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__colony_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
@@ -103,6 +109,9 @@ class Visualisation:
         self.__init_pheromone_entry.pack()
         self.__init_pheromone_entry.insert(0, self.__colony_params["init_pheromone"])
         
+        
+        # Gestion des general_params : N_pop, num_genetic_steps, num_colony_steps
+        
         self.__general_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
         self.__general_params_frame.pack(side=tk.RIGHT, fill=tk.X)
         
@@ -125,6 +134,25 @@ class Visualisation:
         self.__num_colony_steps_entry = tk.Entry(self.__general_params_frame, justify="center")
         self.__num_colony_steps_entry.pack()
         self.__num_colony_steps_entry.insert(0, self.__general_params["num_colony_steps"])
+        
+        
+        # Frame d'affichage des résultats
+        
+        self.__results_frame = tk.Frame(self.__root, bg = "yellow", highlightbackground="green", highlightcolor="blue", highlightthickness=3)
+        self.__results_frame.pack(side=tk.TOP, fill=tk.X)
+        
+        self.__step_label = tk.Label(self.__results_frame, text="Generation : -")
+        self.__step_label.pack()
+        
+        self.__best_score_label = tk.Label(self.__results_frame, text="Best score : -")
+        self.__best_score_label.pack()
+        
+        self.__best_path_label = tk.Label(self.__results_frame, text="Best path : -")
+        self.__best_path_label.pack()
+        
+        self.__best_ant_label = tk.Label(self.__results_frame, text="Best ant : -")
+        self.__best_ant_label.pack()
+        
         self.__root.mainloop()
         
     def raise_error_value(self, error_msg: str) -> None:
@@ -243,8 +271,21 @@ class Visualisation:
     def get_general_params(self) -> dict[str, int]:
         return self.__general_params
     
+    
+    # Affichage dynamique des résultats en temps réel : Generation, Best score, Best path, Best ant
+    
     def update_generation_label(self, i: int) -> None:
-        self.__step_label.config(text=f"Génération : {i}")
+        self.__step_label.config(text=f"Generation : {i}")
+        
+    def update_best_score_label(self, s : float) -> None:
+        self.__best_score_label.config(text=f"Best score : {s:.3f}")
+        
+    def update_best_path_label(self, path : list[int]) -> None:
+        self.__best_path_label.config(text=f"Best path : {path}")
+        
+    def update_best_ant_label(self, ant_str : str) -> None:
+        self.__best_ant_label.config(text=f"Best ant : {ant_str}")
+        
         
     def set_mode_create(self) -> None:
         self.__mode = "create"
@@ -534,6 +575,7 @@ class Simulation(Genetic, Colony, Visualisation):
         for i in range(N_genetic_steps):
             print(f"\nEtape génétique {i}")
             self.update_generation_label(i)
+            
             for j in range(N_colony_steps_each_generation):
                 print(f"Etape colonie {j}")
                 self.colony_step()
@@ -543,6 +585,13 @@ class Simulation(Genetic, Colony, Visualisation):
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 sleep(.1)
+                
+            # Mise à jour des résultats affichés à la fin d'une génération
+            self.rank_pop()
+            best_ant = self.get_best_ant()
+            self.update_best_ant_label(best_ant.str_dynamic_result())
+            self.update_best_score_label(best_ant.get_score())
+            self.update_best_path_label(str_path(best_ant.get_path_nodes()))
             sleep(0.5) # Pour observer
                 
             if i != N_genetic_steps - 1: # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)

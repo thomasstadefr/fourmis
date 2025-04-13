@@ -1,6 +1,6 @@
 from random import uniform, choices
 #from typing import Self
-from city_graph import Edge, Node, CityGraph
+from city_graph import Edge, Node, CityGraph, str_path
 
 class Ant:
     q0:float = 0.5
@@ -13,7 +13,7 @@ class Ant:
         alpha: float,
         beta: float,
         gamma: float, # pour pondérer les choix de prochaine ville par la mémoire
-        metric #: callable[Self, float]
+        metric
     ):
         self.__q = q 
         self.__alpha = alpha
@@ -24,7 +24,7 @@ class Ant:
         self.__path_edges: list[Edge] = []
         self.__num_visited: int = 1
         self.__L_path: float = 0
-        self.__metric = metric #: callable[Self, float]
+        self.__metric = metric
         self.__score: float = self.__metric(self)
         self.__finished: bool = False
         
@@ -127,14 +127,11 @@ class Ant:
                 break
             
     def __str__(self):
-        txt_path = "["
-        for node in self.__path_nodes:
-            txt_path += str(node.get_id())
-            txt_path += ","
-        txt_path += "]"
+        txt_path = str_path(self.get_path_nodes())
         return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, path : {txt_path}, score : {self.__score:.3f}, finished : {self.__finished}"
          
-         
+    def str_dynamic_result(self) -> str:
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, finished : {self.__finished}"
          
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     ant_nodes = city_graph.random_nodes(N_pop)
