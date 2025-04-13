@@ -29,7 +29,7 @@ class Visualisation:
         ] = {}
         self.__written_ids: dict[
             tuple[int, int],
-            any
+            int
         ] = {}
         self.__mode = "create"
         self.__canvas.bind("<Button-1>", self.select_node)
@@ -528,6 +528,7 @@ class Simulation(Genetic, Colony, Visualisation):
     def __init__(self, genetic_params, colony_params, general_params, metric): #: callable[Ant, float]
         self.__city_graph = CityGraph()
         self.__steps: int = 0
+        self.__metric = metric
         Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params, self.initialize)
 
     def initialize(self) -> None:
@@ -538,7 +539,6 @@ class Simulation(Genetic, Colony, Visualisation):
         self.__N_pop = self.__general_params["N_pop"]
         self.__N_genetic_steps = self.__general_params["num_genetic_steps"]
         self.__N_colony_steps_each_generation = self.__general_params["num_colony_steps"]
-        self.__metric = metric
         self.__population = random_population(self.__city_graph, self.__N_pop, self.__metric)
 
         Genetic.__init__(
@@ -549,7 +549,7 @@ class Simulation(Genetic, Colony, Visualisation):
             self.__genetic_params["rand_rate"],
             self.__genetic_params["mutation_rate"],
             self.__genetic_params["crossover_rate"],
-            metric
+            self.__metric
         )
         Colony.__init__(
             self,
@@ -558,8 +558,7 @@ class Simulation(Genetic, Colony, Visualisation):
             self.__general_params["N_pop"],
             self.__colony_params["evap_rate"],
             self.__colony_params["Q"],
-            self.__colony_params["init_pheromone"],
-            metric
+            self.__colony_params["init_pheromone"]
         )
             
         print(self)

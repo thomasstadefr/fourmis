@@ -132,7 +132,9 @@ class Ant:
          
     def str_dynamic_result(self) -> str:
         return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, finished : {self.__finished}"
-         
+
+# Fonctions utiles pour Genetic
+
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     ant_nodes = city_graph.random_nodes(N_pop)
     return [new_random_ant(city_graph, node, metric) for node in ant_nodes]

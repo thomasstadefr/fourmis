@@ -10,8 +10,7 @@ class Colony:
         N_pop: int,
         evap_rate: float,
         Q: float,
-        init_pheromone: float,
-        metric
+        init_pheromone: float
     ):
         self.__city_graph: CityGraph = city_graph
         for edge in city_graph.get_edges():
