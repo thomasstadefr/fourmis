@@ -8,6 +8,9 @@ class Node:
         x: int,
         y: int
     ):
+        self.__x = x
+        self.__y = y
+        
         '''
         On doit attendre de connaître le nombre de sommets (= nombre de couleurs max) avant de créer les tableaux associant
         une donnée à chaque couleur
@@ -30,16 +33,23 @@ class Node:
     
     def get_y(self) -> int:
         return self.__y
+        
     
     # Remise à zéro de la coloration du graphe au début de chque étape de colonie pour chaque fourmi
     def reset_available_colors(self, N_v: int) -> None:
         self.__available_colors = [i for i in range(0, N_v)]
         self.__nb_available_colors = N_v
         
-    def get_available_colors(self):
+    def get_available_colors(self) -> list[int]:
         return self.__available_colors    
     
-    def get_pheromones(self):
+    def prevent_color(self, c: int) -> None:
+        if c in self.__available_colors:
+            self.__available_colors.remove(c)
+    
+    
+    
+    def get_pheromones(self) -> list[float]:
         return self.__pheromones
             
     def get_color(self) -> int:
@@ -119,6 +129,12 @@ class CityGraph:
     
     def get_nodes(self) -> list[Node]:
         return self.__nodes
+    
+    def find_node_from_id(self, id: int) -> Node:
+        l_nodes = self.__nodes
+        for n in l_nodes:
+            if n.get_id() == id:
+                return Node
         
     def add_node(self, n: Node) -> None:
         self.__nodes.append(n)
@@ -137,6 +153,8 @@ class CityGraph:
         
     def random_nodes(self, k_nodes) -> list[Node]:
         return random.choices(self.__nodes, k=k_nodes)
+    
+    
     
     def find_edge(self, start: Node, end: Node) -> Edge | None:
         for e in self.__edges:
@@ -160,6 +178,8 @@ class CityGraph:
                 L.append(e)
         return L
     
+    
+    
     def add_edge(self, start: Node, end: Node) -> None:
         self.__edges.append(Edge(start, end))
         self.__N_e += 1
@@ -170,15 +190,29 @@ class CityGraph:
         self.__N_e -= 1
     
     
+    
+    
+    # Obtention du voisinnage d'un noeud
+    def get_neighbours(self, n:Node) -> list[Node]:
+        l_edges = self.find_edges_from_node(n)
+        l_neighbours = []
+        
+        for e in l_edges:
+            l_neighbours.append(e.get_end())
+    
+        return l_neighbours
+    
+    
     # Réinitialisation des couleurs disponible avant le trajet d'une fourmi
     def reset_available_colors(self) -> None:
         for n in self.__nodes:
-            n.reset_available_colors()
+            n.reset_available_colors(self.__N_v)
     
     
     def evaporate(self, evap_rate: float) -> None:
         for n in self.__nodes:
             n.evaporation_pheromone(evap_rate)
+            
             
             
         

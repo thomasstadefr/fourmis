@@ -4,7 +4,7 @@ from tkinter import font
 from genetic_color import Genetic
 from colony_color import Colony
 from ant_color import random_population
-from city_graph_color import CityGraph, Node, Edge, str_path
+from city_graph_color import CityGraph, Node, Edge
 
 
 
@@ -536,13 +536,13 @@ class Visualisation:
     
     # Gestion de la mise-à-jour de la phéromone par augmentation et évaporation à la fin d'une étape de colonie
     
-    def update_color_node(self, n: Node) -> None:
-        color = n.get_color()
-        self.change_color_node(n, self.__canvas_colors[color])
+    def update_color_node(self, n: Node, best_color: int) -> None:
+        self.change_color_node(n, self.__canvas_colors[best_color])
 
-    def update_color_all_nodes(self, coloratio: list[int]) -> None:
+    def update_color_all_nodes(self, best_coloration: list[int]) -> None:
         for n in self.__city_graph.get_nodes():
-            self.update_color_node(n)
+            best_color = best_coloration[n.get_id()]
+            self.update_color_node(n, best_color)
             
             
             
@@ -615,8 +615,9 @@ class Simulation(Genetic, Colony, Visualisation):
             # Mise à jour des résultats affichés à la fin d'une génération
             self.rank_pop()
             best_ant = self.get_best_ant()
+            best_coloration = best_ant.get_coloration()
             
-            self.update_color_all_nodes(best_ant.get_coloration())
+            self.update_color_all_nodes(best_coloration)
             
             self.update_best_ant_label(best_ant.str_dynamic_result())
             self.update_best_score_label(best_ant.get_score())

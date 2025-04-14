@@ -12,8 +12,11 @@ class Colony:
         init_pheromone: float
     ):
         self.__city_graph: CityGraph = city_graph
-        for edge in city_graph.get_edges():
-            edge.set_pheromone(init_pheromone)
+        
+        N_v = self.__city_graph.get_N_v()
+        for node in city_graph.get_nodes():
+            node.init_pheromone(init_pheromone, N_v)
+            
         self.__N_pop: int = N_pop
         self.__evap_rate: float = evap_rate
         self.__Q: float = Q
@@ -28,13 +31,12 @@ class Colony:
         l_nodes = self.__city_graph.get_nodes()
                   
         for ant in self.__population:
-            if ant.is_finished():
-                coloration = ant.get_coloration()
-                delta = self.__Q / ant.get_nb_colors()
-                
-                for n in l_nodes:
-                    for color in range(ant.get_nb_colors()):
-                        n.augmentation_pheromone(delta, color)
+            coloration = ant.get_coloration()
+            delta = self.__Q / ant.get_nb_colors()
+            
+            for n in l_nodes:
+                for color in coloration.keys():
+                    n.augmentation_pheromone(delta, color)
 
 
 
