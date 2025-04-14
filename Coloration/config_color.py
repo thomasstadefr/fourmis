@@ -1,4 +1,4 @@
-from ant import Ant
+from ant_color import Ant
 
 genetic_params: dict[str, float] = {
     "rand_rate" : 0.2, 
@@ -18,5 +18,5 @@ general_params: dict[str, int] = {
     "num_colony_steps": 10
 }
 
-def metric(ant: Ant) -> float:
+def metric_color(ant: Ant) -> float:
     return ant.get_L_path()

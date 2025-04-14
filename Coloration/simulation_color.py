@@ -1,10 +1,14 @@
 from time import sleep
 import tkinter as tk
 from tkinter import font
-from genetic import Genetic
-from colony import Colony
-from ant import random_population
-from city_graph import CityGraph, Node, Edge, str_path
+from genetic_color import Genetic
+from colony_color import Colony
+from ant_color import random_population
+from city_graph_color import CityGraph, Node, Edge, str_path
+
+
+
+# La classe Visualisation permet de développer l'interface graphique
 
 class Visualisation:
     def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, initialize):
@@ -44,6 +48,7 @@ class Visualisation:
         self.__settings_frame.pack(side=tk.LEFT, fill=tk.X)
         
         
+        
         # Création du graphe dans l'interface
         
         self.__begin_button = tk.Button(self.__settings_frame, text = 'Begin', command = self.begin)
@@ -55,6 +60,7 @@ class Visualisation:
         self.__delete_edge_mode_button.pack()
         self.__delete_node_mode_button = tk.Button(self.__settings_frame, text = 'Delete node mode', command = self.set_mode_delete_node, bg="grey")
         self.__delete_node_mode_button.pack()
+        
         
         
         # Gestion des genetic_params : rand_rate, mutation_rate, crossover_rate
@@ -83,6 +89,7 @@ class Visualisation:
         self.__crossover_rate_entry.insert(0, self.__genetic_params["crossover_rate"])
         
         
+        
         # Gestion des colony_params : Q, evap_rate, init_pheromone
         
         self.__colony_params_frame = tk.Frame(self.__bottom_frame, bg="brown", highlightbackground="blue", highlightcolor="blue", highlightthickness=3)
@@ -107,6 +114,7 @@ class Visualisation:
         self.__init_pheromone_entry = tk.Entry(self.__colony_params_frame, justify="center")
         self.__init_pheromone_entry.pack()
         self.__init_pheromone_entry.insert(0, self.__colony_params["init_pheromone"])
+        
         
         
         # Gestion des general_params : N_pop, num_genetic_steps, num_colony_steps
@@ -135,6 +143,7 @@ class Visualisation:
         self.__num_colony_steps_entry.insert(0, self.__general_params["num_colony_steps"])
         
         
+        
         # Frame d'affichage des résultats
         
         self.__results_frame = tk.Frame(self.__root, bg = "yellow", highlightbackground="green", highlightcolor="blue", highlightthickness=3)
@@ -152,7 +161,15 @@ class Visualisation:
         self.__best_ant_label = tk.Label(self.__results_frame, text="Best ant : -")
         self.__best_ant_label.pack()
         
+        
+        
+        # Maintien en fonctionnement de la fenêtre
+        
         self.__root.mainloop()
+        
+        
+        
+    # Gestion des erreurs par ouverture de fenêtres d'erreur guidant l'utilisateur    
         
     def raise_error_value(self, error_msg: str) -> None:
         error_window = tk.Tk()
@@ -201,6 +218,10 @@ class Visualisation:
             self.raise_error_value("Values must be int or float")
             return False
         
+        
+    
+    # Démarage de la simulation : récupération des paramètres d'après les champs d'entrée
+            
     def begin(self) -> None:
         if self.check_entries():
             self.__begin = True
@@ -286,6 +307,9 @@ class Visualisation:
         self.__best_ant_label.config(text=f"Best ant : {ant_str}")
         
         
+       
+    # Gestion de la création à la main du graphe par l'utilisateur sur le canvas 
+        
     def set_mode_create(self) -> None:
         self.__mode = "create"
         self.__create_mode_button.config(bg="green")
@@ -344,14 +368,17 @@ class Visualisation:
         r: int
     ) -> None:
         n = Node(x, y)
-        self.__city_graph.add_node(n)
-        self.draw_node(x, y, r, n.get_id())
+        self.__city_graph.add_node(n)  # création réelle du noeud
+        self.draw_node(x, y, r, n.get_id())  # dessin du noeud
         
     def delete_node(self, n_new: Node) -> None:
         g = self.__city_graph
+        
+        # récupération des arêtes venant du noeud ou allant vers le noeud pour les supprimer égalemennt
         edges_from_n = g.find_edges_from_node(n_new)
         edges_to_n = g.find_edges_to_node(n_new)
         dr_e = self.__drawn_edges
+        
         for e in edges_from_n:
             n_end = e.get_end()
             shape = dr_e[(
@@ -360,7 +387,7 @@ class Visualisation:
                 n_end.get_x(),
                 n_end.get_y()
             )]
-            self.__canvas.delete(shape)
+            self.__canvas.delete(shape)  # suppression graphique de la forme de la route
         for e in edges_to_n:
             n_start = e.get_start()
             shape = dr_e[(
@@ -369,14 +396,16 @@ class Visualisation:
                 n_new.get_x(),
                 n_new.get_y()
             )]
-            self.__canvas.delete(shape)
-        g.remove_node(n_new)
+            self.__canvas.delete(shape)  # suppression graphique de la forme de la route
+            
+        g.remove_node(n_new)  # Supression réelle du noeud (et des arêtes adjacentes)
+        
         dr_n = self.__drawn_nodes
         shape = dr_n[(
             n_new.get_x(),
             n_new.get_y()
         )]
-        self.__canvas.delete(shape)
+        self.__canvas.delete(shape)  # suppression graphique de la forme du noeud
         wr_ids = self.__written_ids
         txt = wr_ids[(
             n_new.get_x(),
@@ -416,8 +445,8 @@ class Visualisation:
     ) -> None:
         g = self.__city_graph
         if g.find_edge(n_cur, n_new) is None:
-            g.add_edge(n_cur, n_new)
-            self.draw_edge(
+            g.add_edge(n_cur, n_new)  # création réelle de l'arête
+            self.draw_edge(  # dessin de l'arête
                 n_cur.get_x(),
                 n_cur.get_y(),
                 n_new.get_x(),
@@ -494,6 +523,10 @@ class Visualisation:
             if (xi - x) ** 2 + (yi - y) ** 2 < r ** 2:
                 return n
         return None
+    
+    
+    
+    # Gestion de la mise-à-jour de la phéromone par augmentation et évaporation à la fin d'une étape de colonie
     
     def update_width_edge(self, e: Edge) -> None:
         width = e.get_pheromone()

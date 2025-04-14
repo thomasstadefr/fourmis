@@ -1,6 +1,5 @@
-#import random
-from ant import Ant
-from city_graph import CityGraph
+from ant_tsp import Ant
+from city_graph_tsp import CityGraph
 
 class Colony:
     def __init__(

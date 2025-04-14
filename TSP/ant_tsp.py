@@ -1,6 +1,5 @@
 from random import uniform, choices
-#from typing import Self
-from city_graph import Edge, Node, CityGraph, str_path
+from city_graph_tsp import Edge, Node, CityGraph, str_path
 
 class Ant:
     q0:float = 0.5
@@ -116,8 +115,13 @@ class Ant:
         self.__finished = False
         
     def trip(self) -> bool:
-        # Renvoie si la fourmi a réussi
-        # Autant de pas à faire que nombre de villes : une étape corrspond à un trajet complet 
+        ''' 
+        Dans le meilleur cas autant de pas à faire que nombre de villes.
+        Tolérance de faire 2x plus de pas si dans le pire cas les noeuds sont visités 2 fois chacun (graphe filiforme par exemple).
+        
+        Une étape de colonie correspond à un trajet complet (ie toutes les villes visitées au moins une fois).
+        '''
+
         N_v = self.__city_graph.get_N_v()
         N_steps_max = 2 * N_v
         for _ in range(N_steps_max):
@@ -133,7 +137,15 @@ class Ant:
     def str_dynamic_result(self) -> str:
         return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, finished : {self.__finished}"
 
-# Fonctions utiles pour Genetic
+
+
+'''
+Fonctions utiles pour Genetic : 
+- création d'une fourmie puis population de fourmis aléatoire
+- création d'une fourmi par mutation
+- création d'une fourmi par crossover
+- création d'une fourmi comme maintien d'une fourmi élite
+'''
 
 def random_population(city_graph: CityGraph, N_pop: int, metric) -> list[Ant]:
     ant_nodes = city_graph.random_nodes(N_pop)
@@ -163,7 +175,6 @@ def new_ant_clonage_mutation(city_graph: CityGraph, best_ant: Ant, node: Node, m
     return Ant(city_graph, node, q_new, alpha_new, beta_new, gamma_new, metric)
 
 def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
-    # TODO: faire un VRAI crossover, en faisant la moyenne avec une VRAIE ant
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()
@@ -182,7 +193,16 @@ def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:
     gamma = ant.get_gamma()
     return Ant(city_graph, node, q, alpha, beta, gamma, metric)
 
-def compare_ants(ant1: Ant, ant2: Ant) -> bool:   # relation d'ordre entre les fourmis --> renvoie True ssi ant1 <= ant2
+
+
+'''
+Relation d'ordre entre les fourmis --> renvoie True ssi ant1 <= ant2.
+
+Premier critère : finitude du trajet (tournée complète pour TSP).
+Deuxième critère : longueur du trajet.
+'''
+
+def compare_ants(ant1: Ant, ant2: Ant) -> bool:
     ant1_score = ant1.get_score()
     ant2_score = ant2.get_score()
     ant1_complete = ant1.is_finished()

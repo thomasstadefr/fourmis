@@ -1,5 +1,9 @@
-from ant import Ant, compare_ants, new_random_ant, new_ant_clonage_mutation, new_ant_crossover, elite_ant
-from city_graph import CityGraph
+from ant_tsp import Ant, compare_ants, new_random_ant, new_ant_clonage_mutation, new_ant_crossover, elite_ant
+from city_graph_tsp import CityGraph
+
+
+
+# Tri (fusion) de la population après chaque étape génétique pour avoir les individus par ordre décroissant de performance
 
 def merge_sort_ants(pop: list[Ant]) -> None:
     def merge(i: int, m: int, j: int) -> None:
@@ -29,6 +33,9 @@ def merge_sort_ants(pop: list[Ant]) -> None:
             merge(i, m, j)
 
     aux(0, len(pop))
+
+
+
 
 class Genetic:
     def __init__(
