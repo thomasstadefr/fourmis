@@ -8,8 +8,17 @@ class Node:
         x: int,
         y: int
     ):
-        self.__x: int = x
-        self.__y: int = y
+        '''
+        On doit attendre de connaître le nombre de sommets (= nombre de couleurs max) avant de créer les tableaux associant
+        une donnée à chaque couleur
+        '''
+        self.__available_colors: list[int] = []
+        self.__nb_available_colors: int = 0
+        
+        self.__color: int = None  # couleur du noeud déterminé après une étape de colonie : selon la coloration du meilleur individu
+        
+        self.__pheromones: list[float] = []
+        
         self.__id: int = Node.id
         Node.id += 1
         
@@ -21,6 +30,44 @@ class Node:
     
     def get_y(self) -> int:
         return self.__y
+    
+    # Remise à zéro de la coloration du graphe au début de chque étape de colonie pour chaque fourmi
+    def reset_available_colors(self, N_v: int) -> None:
+        self.__available_colors = [i for i in range(0, N_v)]
+        self.__nb_available_colors = N_v
+        
+    def get_available_colors(self):
+        return self.__available_colors    
+    
+    def get_pheromones(self):
+        return self.__pheromones
+            
+    def get_color(self) -> int:
+        return self.__color
+    
+    def change_color(self, new_color) -> None:
+        self.__color = new_color
+        
+        
+        
+    # Gestion du taux de pheromone de chaque couleur
+    
+    # dépôt de phéromone initial à la réation du graphe
+    def init_pheromone(self, ph0: float, N_V: int) -> None:
+        self.__pheromones = [ph0 for _ in range(N_V)]
+        
+    # évaporation de la phéromone (pour toutes les couleurs)
+    def evaporation_pheromone(self, evap_rate: float) -> None:
+        ph = self.__pheromones
+        nb_colors = len(ph)
+        for color in range(nb_colors):
+            ph[color] = (1-evap_rate)*ph[color]
+            
+    # augmentation de la phéromone (pour une couleur en particulier)
+    def augmentation_pheromone(self, delta: float, color: int) -> None:
+        self.__pheromones[color] += delta
+        
+        
     
     def __eq__(self, n: Self) -> bool:
         return self.__id == n.get_id()
@@ -37,11 +84,6 @@ class Edge:
         end: Node
     ):
         assert start != end, f"Boucle sur le noeud {start} !"
-        self.__pheromone: float = 0
-        self.__distance: float = (
-            (start.get_x() - end.get_x()) ** 2
-            + (start.get_y() - end.get_y()) ** 2
-        ) ** .5
         self.__start: Node = start
         self.__end: Node = end
 
@@ -50,27 +92,12 @@ class Edge:
     
     def get_end(self) -> Node:
         return self.__end
-
-    def get_distance(self) -> float:
-        return self.__distance
-    
-    def get_pheromone(self) -> float:
-        return self.__pheromone
-    
-    def set_pheromone(self, pheromone: float) -> None:
-        self.__pheromone = pheromone
-    
-    def evaporate(self, evap_rate: float) -> None:
-        self.__pheromone *= 1 - evap_rate
-    
-    def increase(self, deposited_pheromone: float) -> None:
-        self.__pheromone += deposited_pheromone
         
     def __eq__(self, edge: Self) -> bool:
         return self.__start == edge.get_start() and self.__end == edge.get_end()
     
     def __str__(self) -> str:
-        return f"({self.get_start().get_id()}, {self.get_end().get_id()}), ph = {self.get_pheromone():.3f}"
+        return f"({self.get_start().get_id()}, {self.get_end().get_id()})"
     
     
         
@@ -142,9 +169,18 @@ class CityGraph:
         del(e)
         self.__N_e -= 1
     
+    
+    # Réinitialisation des couleurs disponible avant le trajet d'une fourmi
+    def reset_available_colors(self) -> None:
+        for n in self.__nodes:
+            n.reset_available_colors()
+    
+    
     def evaporate(self, evap_rate: float) -> None:
-        for e in self.__edges:
-            e.evaporate(evap_rate)
+        for n in self.__nodes:
+            n.evaporation_pheromone(evap_rate)
+            
+            
         
     def str_edges(self) -> str:
         txt_edges = "Edges : "
@@ -162,13 +198,3 @@ class CityGraph:
         
     def __str__(self) -> str:
         return "\n" + self.str_nodes() + "\n" + self.str_edges() + "\n"
-
-
-
-def str_path(path : list[Node]) -> str:
-    txt_path = "["
-    for node in path:
-        txt_path += str(node.get_id())
-        txt_path += ","
-    txt_path += "]"
-    return txt_path

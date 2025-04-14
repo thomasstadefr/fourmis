@@ -18,5 +18,28 @@ general_params: dict[str, int] = {
     "num_colony_steps": 10
 }
 
-def metric_color(ant: Ant) -> float:
-    return ant.get_L_path()
+def metric_color(ant: Ant) -> int:
+    return ant.get_nb_colors()
+
+canvas_colors = [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "orange",
+    "purple",
+    "pink",
+    "cyan",
+    "magenta",
+    "brown",
+    "gray",
+    "black",
+    "white",
+    "olive",
+    "forestgreen",
+    "navy",
+    "skyblue",
+    "turquoise",
+    "coral",
+    "gold"
+]

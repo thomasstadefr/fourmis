@@ -11,21 +11,26 @@ class Ant:
         q: float,
         alpha: float,
         beta: float,
-        gamma: float, # pour pondérer les choix de prochaine ville par la mémoire
         metric
     ):
         self.__q = q 
         self.__alpha = alpha
         self.__beta = beta
-        self.__gamma = gamma
+        
         self.__city_graph = city_graph
         self.__path_nodes: list[Node] = [pos_init]
         self.__path_edges: list[Edge] = []
+        
         self.__num_visited: int = 1
-        self.__L_path: float = 0
+        
+        self.__nb_colors: int = 0
+        self.__coloration: list[int] = []
+        
         self.__metric = metric
         self.__score: float = self.__metric(self)
         self.__finished: bool = False
+        
+        
         
     def is_finished(self) -> bool:
         return self.__finished
@@ -42,8 +47,14 @@ class Ant:
     def get_path_edges(self) -> list[Edge]:
         return self.__path_edges
     
-    def get_L_path(self) -> float:
-        return self.__L_path
+    
+    def get_coloration(self):
+        return self.__coloration
+    
+    def get_nb_colors(self) -> int:
+        return self.__nb_colors
+    
+    
     
     def get_q(self) -> float:
         return self.__q
@@ -63,79 +74,90 @@ class Ant:
     def update_score(self) -> None:
         self.__score: float = self.__metric(self)
         
-    def score_choices(self) -> tuple[list[Edge], list[float], Edge]:
-        r = self.get_pos()
-        l_edges = self.__city_graph.find_edges_from_node(r)
-        l_scores: list[float] = []
-        assert len(l_edges) > 0, "Graphe non fortement connexe"
         
-        max_edge = l_edges[0]
+    # détermine si une couleur n'est pas déjà utilisée dans la coloration en cours
+    def is_new(self, color) -> bool:
+        return not(color in self.__coloration)
+       
+    # détermination de la distribution de couleurs disponibles à la position actuelle 
+    def score_choices(self) -> tuple[list[int], list[float], int]:
+        r = self.get_pos()
+        
+        lst_available_colors = r.get_available_colors()
+        pheromones = r.get_pheromones()
+        
+        alpha = self.__alpha
+        beta = self.__beta
+        
+        l_scores = []
+        
+        max_color = lst_available_colors[0]
         max_score = 0
-        for e in l_edges:
-            tau = e.get_pheromone()
-            eta = 1 / e.get_distance()
-            end = e.get_end()
-            score: float = tau ** self.__alpha * eta ** self.__beta
-            try:
-                last_time = self.__path_nodes[::-1].index(end) # nombre d'étapes deppuis la dernière visite
-            except ValueError: # noeud end jamais visité
-                last_time = float("inf")        
-            score *= 1 - (1 - self.__gamma) ** last_time # pondération par un premier ordre
+        
+        for color in lst_available_colors:
+            tau = pheromones[color]
+            
+            score = (1 - alpha*int(self.is_new(color))) * tau**beta
             l_scores.append(score)
+            
             if score > max_score:
                 max_score = score
-                max_edge = e
-        return l_edges, l_scores, max_edge
+                max_color = color
+        return lst_available_colors, l_scores, max_color
 
-    def next_city(self) -> Node:
-        l_edges, l_scores, max_edge = self.score_choices()
-        if self.__q <= Ant.q0:
-            next_edge = choices(l_edges, l_scores)[0]
-        else:
-            next_edge = max_edge
-        return next_edge.get_end()
-
-    def move(self) -> None:
-        start = self.get_pos()
-        end = self.next_city()
-        edge = self.__city_graph.find_edge(start, end)
+    def next_color(self) -> int:
+        lst_available_colors, l_scores, max_color = self.score_choices()
         
-        if end not in self.__path_nodes:
+        if self.__q <= Ant.q0:
+            color = choices(lst_available_colors, l_scores)[0]
+        else:
+            color = max_color
+        return color
+
+
+    def go_to(self, r: Node) -> None:
+        edge = self.__city_graph.find_edge(self.get_pos(), r)
+        
+        if r not in self.__path_nodes:
             self.__num_visited += 1
-        self.__path_nodes.append(end)
+        self.__path_nodes.append(r)
         self.__path_edges.append(edge)
-        self.__L_path += edge.get_distance()
+        
+        color = self.next_color()
+        
+        self.__coloration[r.get_id()] = color
         self.update_score()
         
+        
     def reset_trip(self):
-        self.__path_nodes = [self.get_pos_init()]
+        self.__coloration = []
+        self.__nb_colors = 0
+        
         self.__path_edges = []
-        self.__L_path = 0
         self.__num_visited = 1
         self.__finished = False
         
     def trip(self) -> bool:
-        ''' 
-        Dans le meilleur cas autant de pas à faire que nombre de villes.
-        Tolérance de faire 2x plus de pas si dans le pire cas les noeuds sont visités 2 fois chacun (graphe filiforme par exemple).
-        
-        Une étape de colonie correspond à un trajet complet (ie toutes les villes visitées au moins une fois).
         '''
-
+        Trajet effectué selon un parocurs en largeur,
+        avec comme heuristique de choisir le noeud adjacent le plus contraint
+        (ayant le moins de couleurs restantes disponibles)
+        '''
+        
         N_v = self.__city_graph.get_N_v()
         N_steps_max = 2 * N_v
         for _ in range(N_steps_max):
             self.move()
-            if self.__num_visited == N_v and self.get_pos() == self.get_pos_init():  # Condition de complétude d'une tournée
+            if self.__num_visited == N_v:  # Condition de complétude d'une tournée
                 self.__finished = True
                 break
             
     def __str__(self):
         txt_path = str_path(self.get_path_nodes())
-        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, path : {txt_path}, score : {self.__score:.3f}, finished : {self.__finished}"
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, path : {txt_path}, score : {self.__score:.3f}, finished : {self.__finished}"
          
     def str_dynamic_result(self) -> str:
-        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, gamma : {self.__gamma:.3f}, finished : {self.__finished}"
+        return f"q : {self.__q:.3f}, alpha : {self.__alpha:.3f}, beta : {self.__beta:.3f}, finished : {self.__finished}"
 
 
 
@@ -155,24 +177,20 @@ def new_random_ant(city_graph: CityGraph, node: Node, metric) -> Ant:
     q = uniform(0, 1)
     alpha = uniform(0.5, 1.5)
     beta = uniform(0.5, 1.5)
-    gamma = uniform(0, 0.5)
-    return Ant(city_graph, node, q, alpha, beta, gamma, metric)
+    return Ant(city_graph, node, q, alpha, beta, metric)
 
 def new_ant_clonage_mutation(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     q_best = best_ant.get_q()
     alpha_best = best_ant.get_alpha()
     beta_best = best_ant.get_beta()
-    gamma_best = best_ant.get_gamma()
     
     q_new = q_best * uniform(0.9, 1.1)
     if q_new > 1:
         q_new = 1
     alpha_new = alpha_best * uniform(0.9, 1.1)
     beta_new = beta_best * uniform(0.9, 1.1)
-    gamma_new = gamma_best * uniform(0.9, 1.1)
-    if gamma_new > 1:
-        gamma_new = 1
-    return Ant(city_graph, node, q_new, alpha_new, beta_new, gamma_new, metric)
+    
+    return Ant(city_graph, node, q_new, alpha_new, beta_new, metric)
 
 def new_ant_crossover(city_graph: CityGraph, best_ant: Ant, node: Node, metric) -> Ant:
     q_best = best_ant.get_q()
@@ -198,7 +216,7 @@ def elite_ant(city_graph: CityGraph, ant: Ant, node: Node, metric) -> Ant:
 '''
 Relation d'ordre entre les fourmis --> renvoie True ssi ant1 <= ant2.
 
-Premier critère : finitude du trajet (tournée complète pour TSP).
+Premier critère : finitude du trajet (coloration complète pour coloration).
 Deuxième critère : longueur du trajet.
 '''
 

@@ -11,7 +11,7 @@ from city_graph_color import CityGraph, Node, Edge, str_path
 # La classe Visualisation permet de développer l'interface graphique
 
 class Visualisation:
-    def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, initialize):
+    def __init__(self, city_graph: CityGraph, genetic_params, colony_params, general_params, canvas_colors, initialize):
         self.__init = initialize
         self.__root = tk.Tk()
         self.__root.geometry("700x700")
@@ -21,6 +21,8 @@ class Visualisation:
         self.__canvas_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.__canvas = tk.Canvas(self.__canvas_frame, width=700, height=400)
         self.__canvas.pack(fill=tk.BOTH, expand=True)
+        
+        self.__canvas_colors = canvas_colors
         
         self.__drawn_nodes: dict[
             tuple[int, int],
@@ -154,9 +156,6 @@ class Visualisation:
         
         self.__best_score_label = tk.Label(self.__results_frame, text="Best score : -")
         self.__best_score_label.pack()
-        
-        self.__best_path_label = tk.Label(self.__results_frame, text="Best path : -")
-        self.__best_path_label.pack()
         
         self.__best_ant_label = tk.Label(self.__results_frame, text="Best ant : -")
         self.__best_ant_label.pack()
@@ -300,9 +299,6 @@ class Visualisation:
     def update_best_score_label(self, s : float) -> None:
         self.__best_score_label.config(text=f"Best score : {s:.3f}")
         
-    def update_best_path_label(self, path : list[int]) -> None:
-        self.__best_path_label.config(text=f"Best path : {path}")
-        
     def update_best_ant_label(self, ant_str : str) -> None:
         self.__best_ant_label.config(text=f"Best ant : {ant_str}")
         
@@ -434,7 +430,7 @@ class Visualisation:
         x2_tild = x2 - v[0] * r / v_size
         y2_tild = y2 - v[1] * r / v_size
         self.__drawn_edges[(x1, y1, x2, y2)] = self.__canvas.create_line(
-            x1_tild, y1_tild, x2_tild, y2_tild, arrow=tk.LAST, fill="orange"
+            x1_tild, y1_tild, x2_tild, y2_tild, fill="orange"
         )
     
     def create_edge(
@@ -446,11 +442,19 @@ class Visualisation:
         g = self.__city_graph
         if g.find_edge(n_cur, n_new) is None:
             g.add_edge(n_cur, n_new)  # création réelle de l'arête
+            g.add_edge(n_new, n_cur)
             self.draw_edge(  # dessin de l'arête
                 n_cur.get_x(),
                 n_cur.get_y(),
                 n_new.get_x(),
                 n_new.get_y(),
+                r
+            )
+            self.draw_edge(  # dessin de l'arête
+                n_new.get_x(),
+                n_new.get_y(),
+                n_cur.get_x(),
+                n_cur.get_y(),
                 r
             )
         
@@ -460,11 +464,15 @@ class Visualisation:
         n_new: Node
     ) -> None:
         g = self.__city_graph
-        e = g.find_edge(n_cur, n_new)
-        if e:
-            g.remove_edge(e)
+        e1 = g.find_edge(n_cur, n_new)
+        e2 = g.find_edge(n_new, n_cur)
+        if e1 and e2:
+            g.remove_edge(e1)
+            g.remove_edge(e2)
             dr_e = self.__drawn_edges
             shape = dr_e[(n_cur.get_x(), n_cur.get_y(), n_new.get_x(), n_new.get_y())]
+            self.__canvas.delete(shape)
+            shape = dr_e[(n_new.get_x(), n_new.get_y(), n_cur.get_x(), n_cur.get_y())]
             self.__canvas.delete(shape)
             
     def select_node(self, event: tk.Event) -> None:
@@ -528,40 +536,25 @@ class Visualisation:
     
     # Gestion de la mise-à-jour de la phéromone par augmentation et évaporation à la fin d'une étape de colonie
     
-    def update_width_edge(self, e: Edge) -> None:
-        width = e.get_pheromone()
-        start = e.get_start()
-        end = e.get_end()
-        shape = self.__drawn_edges[(start.get_x(), start.get_y(), end.get_x(), end.get_y())]
-        self.__canvas.itemconfig(shape, fill="orange", width=width, dash=())
-        if width < 1:
-            self.__canvas.itemconfig(shape, dash=(10, 10))
+    def update_color_node(self, n: Node) -> None:
+        color = n.get_color()
+        self.change_color_node(n, self.__canvas_colors[color])
 
-    def update_width_all_edges(self) -> None:
-        for e in self.__city_graph.get_edges():
-            self.update_width_edge(e)
-    
-
-    def update_color_edge(self, e: Edge) -> None:
-        start = e.get_start()
-        end = e.get_end()
-        shape = self.__drawn_edges[(start.get_x(), start.get_y(), end.get_x(), end.get_y())]
-        self.__canvas.itemconfig(shape, fill="red")
-
-    def update_color_best_path(self, best_path_edges: list[Edge]) -> None:
-        for e in best_path_edges:
-            self.update_color_edge(e)
-
-    
+    def update_color_all_nodes(self, coloratio: list[int]) -> None:
+        for n in self.__city_graph.get_nodes():
+            self.update_color_node(n)
+            
+            
+            
     def get_root(self):
         return self.__root
 
 class Simulation(Genetic, Colony, Visualisation):
-    def __init__(self, genetic_params, colony_params, general_params, metric): #: callable[Ant, float]
+    def __init__(self, genetic_params, colony_params, general_params, metric, canvas_colors): #: callable[Ant, float]
         self.__city_graph = CityGraph()
         self.__steps: int = 0
         self.__metric = metric
-        Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params, self.initialize)
+        Visualisation.__init__(self, self.__city_graph, genetic_params, colony_params, general_params, canvas_colors, self.initialize)
 
     def initialize(self) -> None:
         self.__genetic_params = self.get_genetic_params()
@@ -597,22 +590,24 @@ class Simulation(Genetic, Colony, Visualisation):
         self.launch()
         print(f"Edges after the simulation : {self.__city_graph.str_edges()}\n")
 
+
+
+    # Boucle principale de l'algorithme
+
     def launch(self) -> None:
         # A chaque étape génétique, on lance un certain nombre d'étapes de colonies pour laisser le temps aux individus de démontrer leur adpatation
         N_genetic_steps = self.__N_genetic_steps
         N_colony_steps_each_generation = self.__N_colony_steps_each_generation
-        
-        self.update_width_all_edges()
+
         for i in range(N_genetic_steps):
             print(f"\nEtape génétique {i}")
             self.update_generation_label(i)
             
             for j in range(N_colony_steps_each_generation):
                 print(f"Etape colonie {j}")
+                
                 self.colony_step()
-                self.update_width_all_edges() # épaisseur mise à jour, et tout remis en orange
-                best_path_edges = self.get_best_ant().get_path_edges()
-                self.update_color_best_path(best_path_edges) # mise en rouge du best path
+
                 self.get_root().update()
                 print(f"Population après l'étape {j} de colonie pour la génération {i} : {self.str_population()}\n")
                 sleep(.1)
@@ -620,9 +615,11 @@ class Simulation(Genetic, Colony, Visualisation):
             # Mise à jour des résultats affichés à la fin d'une génération
             self.rank_pop()
             best_ant = self.get_best_ant()
+            
+            self.update_color_all_nodes(best_ant.get_coloration())
+            
             self.update_best_ant_label(best_ant.str_dynamic_result())
             self.update_best_score_label(best_ant.get_score())
-            self.update_best_path_label(str_path(best_ant.get_path_nodes()))
             sleep(0.5) # Pour observer
                 
             if i != N_genetic_steps - 1: # si on a fini la simulation -> pas de nouvelle étape (sinon on ne peut pas récupérer le meilleur individu)
@@ -630,6 +627,8 @@ class Simulation(Genetic, Colony, Visualisation):
             
         self.rank_pop()
         print("Meilleur individu : ", str(self.get_best_ant()), "\n")
+          
+          
           
     def str_population(self) -> str:
         self.rank_pop()
